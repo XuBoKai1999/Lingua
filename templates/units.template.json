@@ -1,0 +1,22 @@
+{
+  "units": [
+    {
+      "id": "U001",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "預約門診與掛號",
+      "description": "能預約門診、確認時間與地點，並在抵達診所或醫院時完成基本報到。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U002",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "描述症狀與詢問用藥",
+      "description": "能向醫護人員描述症狀、持續時間與重要過敏資訊，並確認基本用藥指示。",
+      "level": null,
+      "requirements": ""
+    }
+  ]
+}
