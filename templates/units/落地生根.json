@@ -1,0 +1,1156 @@
+{
+  "units": [
+    {
+      "id": "U001",
+      "stage": 0,
+      "context": "緊急求助",
+      "scenario": "遇險呼救",
+      "description": "能在面臨立即危險時大聲求助，指出所在位置及需要的協助。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U002",
+      "stage": 0,
+      "context": "緊急求助",
+      "scenario": "報警與聯絡救援",
+      "description": "能聯絡警察或其他救援單位，簡短說明事件、地點與自身安全狀況。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U003",
+      "stage": 0,
+      "context": "緊急醫療",
+      "scenario": "嚴重症狀與受傷",
+      "description": "能指出疼痛或受傷部位，表達呼吸困難、失去意識等急症並要求就醫。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U004",
+      "stage": 0,
+      "context": "緊急醫療",
+      "scenario": "過敏與重要健康資訊",
+      "description": "能說明重大過敏、必要用藥或重要健康限制，並理解最基本的醫療確認問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U005",
+      "stage": 0,
+      "context": "基本溝通",
+      "scenario": "請求重複與翻譯協助",
+      "description": "能表示自己聽不懂、請對方說慢一點或重複，並請求文字或翻譯協助。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U006",
+      "stage": 0,
+      "context": "基本溝通",
+      "scenario": "肯定、否定與基本請求",
+      "description": "能表達需要、不需要、同意、拒絕及最基本的禮貌請求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U007",
+      "stage": 0,
+      "context": "個人與基本資訊",
+      "scenario": "身分與聯絡資訊",
+      "description": "能提供姓名、國籍、聯絡方式及同行者資訊，並核對重要資料。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U008",
+      "stage": 0,
+      "context": "個人與基本資訊",
+      "scenario": "數字、價格與數量",
+      "description": "能聽懂並說出基本數字、金額、數量，確認付款前的數字資訊。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U009",
+      "stage": 0,
+      "context": "個人與基本資訊",
+      "scenario": "日期、時間與約定",
+      "description": "能理解日期、時刻及營業時間，並約定簡單的見面時間。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U010",
+      "stage": 0,
+      "context": "方向與交通",
+      "scenario": "迷路、定位與問路",
+      "description": "能說明自己迷路、提供所在位置，並詢問基本方向與目的地。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U011",
+      "stage": 0,
+      "context": "方向與交通",
+      "scenario": "搭乘最基本交通工具",
+      "description": "能指出目的地、詢問應搭乘的車輛或路線，並確認是否抵達。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U012",
+      "stage": 0,
+      "context": "必要交易",
+      "scenario": "付款與交易確認",
+      "description": "能詢問費用、選擇付款方式、確認是否付款成功及索取找零。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U013",
+      "stage": 0,
+      "context": "必要交易",
+      "scenario": "購買食物與安全飲水",
+      "description": "能取得基本食物與飲水，表達不能食用的物品及最簡單的需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U014",
+      "stage": 0,
+      "context": "住宿與通訊",
+      "scenario": "尋找臨時住宿",
+      "description": "能詢問當晚是否有可住的房間、價格、位置及基本入住需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U015",
+      "stage": 0,
+      "context": "住宿與通訊",
+      "scenario": "手機、網路與緊急聯絡",
+      "description": "能請求借用電話、連線網路或傳遞必要訊息以聯繫他人。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U016",
+      "stage": 0,
+      "context": "意外應變",
+      "scenario": "遺失證件與重要財物",
+      "description": "能說明護照、錢包或手機遺失，請求協助與詢問下一步應如何處理。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U017",
+      "stage": 1,
+      "context": "城市交通",
+      "scenario": "公車路線與站牌",
+      "description": "能閱讀或詢問公車路線、站名、班次及下車位置。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U018",
+      "stage": 1,
+      "context": "城市交通",
+      "scenario": "地鐵與轉乘",
+      "description": "能找出適合的地鐵路線、辨認轉乘資訊與出口，並詢問路線是否正確。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U019",
+      "stage": 1,
+      "context": "城市交通",
+      "scenario": "計程車與共乘",
+      "description": "能說明上下車地點、確認車資與路線，並處理與司機的基本溝通。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U020",
+      "stage": 1,
+      "context": "城市交通",
+      "scenario": "步行導航與地標",
+      "description": "能根據路標及地標問路，描述步行路線、距離與轉彎位置。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U021",
+      "stage": 1,
+      "context": "城際交通",
+      "scenario": "火車訂票與座位",
+      "description": "能查詢車次、票種、座位及票價，並購買城際火車車票。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U022",
+      "stage": 1,
+      "context": "城際交通",
+      "scenario": "長途客運與其他接駁",
+      "description": "能詢問長途車班、候車地點、行李限制及抵達方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U023",
+      "stage": 1,
+      "context": "城際交通",
+      "scenario": "交通誤點與錯過班次",
+      "description": "能確認誤點或停駛資訊，尋找替代路線或下一班車。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U024",
+      "stage": 1,
+      "context": "城際交通",
+      "scenario": "改票、退票與轉乘問題",
+      "description": "能提出變更行程、退票或轉乘失敗的需求，理解基本處理選項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U025",
+      "stage": 1,
+      "context": "機場與出入境",
+      "scenario": "機場報到與安檢",
+      "description": "能找到報到櫃檯、確認登機資訊並配合基本安檢問答。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U026",
+      "stage": 1,
+      "context": "機場與出入境",
+      "scenario": "登機口與航班異動",
+      "description": "能理解登機公告、改登機口、延誤與取消資訊並尋求協助。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U027",
+      "stage": 1,
+      "context": "機場與出入境",
+      "scenario": "入境目的與文件問答",
+      "description": "能簡要說明旅行目的、停留時間、住處與必要文件資訊。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U028",
+      "stage": 1,
+      "context": "機場與出入境",
+      "scenario": "行李領取與申報",
+      "description": "能處理托運行李領取、遺失或損壞，並詢問基本申報流程。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U029",
+      "stage": 1,
+      "context": "旅館住宿",
+      "scenario": "查詢空房與預訂",
+      "description": "能詢問房型、日期、價格與設施，完成或確認住宿預訂。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U030",
+      "stage": 1,
+      "context": "旅館住宿",
+      "scenario": "入住與身分核對",
+      "description": "能辦理入住、核對訂房資訊，確認房間位置與使用規則。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U031",
+      "stage": 1,
+      "context": "旅館住宿",
+      "scenario": "設施需求與住宿問題",
+      "description": "能詢問網路、洗衣、空調等設施，描述設備故障或房間問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U032",
+      "stage": 1,
+      "context": "旅館住宿",
+      "scenario": "退房、延住與費用爭議",
+      "description": "能辦理退房、詢問延住或寄放行李，核對不明費用。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U033",
+      "stage": 1,
+      "context": "餐廳與飲食",
+      "scenario": "尋找餐廳與候位",
+      "description": "能詢問營業時間、座位、候位規則及是否需要預約。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U034",
+      "stage": 1,
+      "context": "餐廳與飲食",
+      "scenario": "閱讀菜單與選餐",
+      "description": "能理解常見菜名、份量及口味描述，詢問推薦並完成點餐。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U035",
+      "stage": 1,
+      "context": "餐廳與飲食",
+      "scenario": "過敏、忌口與餐點確認",
+      "description": "能詢問食材及調理方式，清楚表達過敏或飲食限制並確認訂單。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U036",
+      "stage": 1,
+      "context": "餐廳與飲食",
+      "scenario": "結帳、外帶與訂單問題",
+      "description": "能要求結帳、外帶或打包，並反映漏餐、錯餐或費用問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U037",
+      "stage": 1,
+      "context": "購物與消費",
+      "scenario": "尋找商品與尺寸",
+      "description": "能詢問商品位置、尺寸、顏色及庫存。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U038",
+      "stage": 1,
+      "context": "購物與消費",
+      "scenario": "規格、品質與比較",
+      "description": "能比較價位、功能和品質，詢問適合需求的選項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U039",
+      "stage": 1,
+      "context": "購物與消費",
+      "scenario": "折扣、付款與收據",
+      "description": "能理解促銷條件、選擇支付方式、核對折扣及取得收據。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U040",
+      "stage": 1,
+      "context": "購物與消費",
+      "scenario": "退換貨與售後處理",
+      "description": "能描述商品問題，詢問退貨、換貨、維修與退款政策。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U041",
+      "stage": 1,
+      "context": "觀光與行程安排",
+      "scenario": "景點資訊與門票",
+      "description": "能查詢景點營業時間、票價、入場規則與購票方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U042",
+      "stage": 1,
+      "context": "觀光與行程安排",
+      "scenario": "活動與導覽預約",
+      "description": "能預約活動或導覽，確認集合位置、時刻及參加條件。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U043",
+      "stage": 1,
+      "context": "觀光與行程安排",
+      "scenario": "行程諮詢與當地建議",
+      "description": "能詢問適合的行程、交通方式、天候影響及當地注意事項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U044",
+      "stage": 1,
+      "context": "觀光與行程安排",
+      "scenario": "行程取消與臨時調整",
+      "description": "能處理預約取消、行程變更及替代安排，與服務人員協商可行選項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U045",
+      "stage": 2,
+      "context": "租屋與居住",
+      "scenario": "尋找房源與看房",
+      "description": "能描述租屋條件、詢問空房與設備，預約並完成看房交流。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U046",
+      "stage": 2,
+      "context": "租屋與居住",
+      "scenario": "租約條件與房東溝通",
+      "description": "能詢問租期、住戶規定及主要契約條款，與房東確認權利義務。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U047",
+      "stage": 2,
+      "context": "租屋與居住",
+      "scenario": "租金、押金與費用",
+      "description": "能核對租金、押金、管理費、水電費及付款日期。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U048",
+      "stage": 2,
+      "context": "租屋與居住",
+      "scenario": "入住、搬遷與退租",
+      "description": "能安排入住和搬家，回報屋況並討論退租與交屋流程。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U049",
+      "stage": 2,
+      "context": "家務與維修",
+      "scenario": "家具與家電採購",
+      "description": "能選購必要家具家電、比較規格並協調配送及安裝。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U050",
+      "stage": 2,
+      "context": "家務與維修",
+      "scenario": "水電與設備報修",
+      "description": "能描述漏水、斷電、熱水器或設備故障，安排維修及確認費用。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U051",
+      "stage": 2,
+      "context": "家務與維修",
+      "scenario": "清潔、回收與生活雜務",
+      "description": "能理解住處清潔要求、垃圾分類及生活用品補充方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U052",
+      "stage": 2,
+      "context": "家務與維修",
+      "scenario": "大樓設施與住戶規範",
+      "description": "能詢問公共空間、噪音、收件及大樓維護規定並溝通問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U053",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "預約門診與掛號",
+      "description": "能預約門診、確認時間與地點，並在抵達診所或醫院時完成基本報到。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U054",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "描述症狀與病程",
+      "description": "能向醫護人員描述症狀、持續時間、變化與重要過敏資訊。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U055",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "檢查、治療與同意說明",
+      "description": "能理解檢查或治療的基本安排，詢問準備事項、風險與替代選項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U056",
+      "stage": 2,
+      "context": "看醫生",
+      "scenario": "取藥、用藥與回診",
+      "description": "能核對藥品、使用方式與注意事項，安排回診並提出用藥疑問。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U057",
+      "stage": 2,
+      "context": "銀行與財務",
+      "scenario": "開戶與身分驗證",
+      "description": "能詢問開立帳戶的條件、文件、卡片及驗證流程。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U058",
+      "stage": 2,
+      "context": "銀行與財務",
+      "scenario": "帳單與固定支出",
+      "description": "能理解房租、公用事業與訂閱帳單，確認繳費期限與方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U059",
+      "stage": 2,
+      "context": "銀行與財務",
+      "scenario": "轉帳、提款與匯款",
+      "description": "能詢問交易限額、手續費、匯率及跨境轉帳注意事項。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U060",
+      "stage": 2,
+      "context": "銀行與財務",
+      "scenario": "付款失敗與財務異常",
+      "description": "能聯絡金融客服，描述可疑交易、卡片遺失或帳戶操作問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U061",
+      "stage": 2,
+      "context": "行政與證件",
+      "scenario": "居留資格與期限",
+      "description": "能詢問居留或簽證相關文件、效期及辦理地點。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U062",
+      "stage": 2,
+      "context": "行政與證件",
+      "scenario": "地址登記與資料變更",
+      "description": "能完成基本住址登記、變更聯絡資料及理解通知內容。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U063",
+      "stage": 2,
+      "context": "行政與證件",
+      "scenario": "政府服務申請",
+      "description": "能詢問公共機關的申請流程、預約、文件及補件需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U064",
+      "stage": 2,
+      "context": "行政與證件",
+      "scenario": "證件換發與重要通知",
+      "description": "能處理證件到期、補發及行政通知，詢問期限與後續步驟。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U065",
+      "stage": 2,
+      "context": "通訊與數位生活",
+      "scenario": "手機門號與資費",
+      "description": "能比較電信方案、詢問費用、合約、漫遊和退租方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U066",
+      "stage": 2,
+      "context": "通訊與數位生活",
+      "scenario": "家用網路與技術支援",
+      "description": "能申裝網路、安排施工，並描述連線不良或設備問題。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U067",
+      "stage": 2,
+      "context": "通訊與數位生活",
+      "scenario": "網站帳號與線上申請",
+      "description": "能理解登入、認證、帳號恢復及常見線上服務操作指示。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U068",
+      "stage": 2,
+      "context": "通訊與數位生活",
+      "scenario": "客服、詐騙與個資安全",
+      "description": "能向客服說明問題、辨認風險提示，並詢問帳戶或個資保護措施。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U069",
+      "stage": 2,
+      "context": "求職與應徵",
+      "scenario": "搜尋職缺與資格要求",
+      "description": "能閱讀職務內容、工作條件與基本資格，詢問申請方法。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U070",
+      "stage": 2,
+      "context": "求職與應徵",
+      "scenario": "履歷、自我介紹與申請",
+      "description": "能簡述教育與工作經驗，完成求職表格及基本求職訊息。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U071",
+      "stage": 2,
+      "context": "求職與應徵",
+      "scenario": "面試與條件詢問",
+      "description": "能回答常見面試問題，詢問工作內容、工時與待遇。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U072",
+      "stage": 2,
+      "context": "求職與應徵",
+      "scenario": "錄取通知與工作合約",
+      "description": "能理解錄取後的流程、起始日期、主要合約條件與必要文件。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U073",
+      "stage": 2,
+      "context": "職場日常",
+      "scenario": "同事介紹與工作流程",
+      "description": "能介紹自己的職責、認識團隊分工，並理解基本工作流程。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U074",
+      "stage": 2,
+      "context": "職場日常",
+      "scenario": "接受任務與進度回報",
+      "description": "能確認交辦事項、期限及優先順序，報告完成狀況與障礙。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U075",
+      "stage": 2,
+      "context": "職場日常",
+      "scenario": "班表、請假與工時",
+      "description": "能詢問排班、休假、加班與工時紀錄，提出合理調整需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U076",
+      "stage": 2,
+      "context": "職場日常",
+      "scenario": "職場問題與意外通報",
+      "description": "能描述工作上的困難、安全疑慮或職場不當事件並尋求適當協助。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U077",
+      "stage": 2,
+      "context": "稅務與保險",
+      "scenario": "稅務基本概念與通知",
+      "description": "能理解常見稅務名詞、稅務通知與基本申報時程。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U078",
+      "stage": 2,
+      "context": "稅務與保險",
+      "scenario": "個人稅務申報與詢問",
+      "description": "能詢問申報方式、所需文件與更正程序，理解基本說明。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U079",
+      "stage": 2,
+      "context": "稅務與保險",
+      "scenario": "保險加入與保障範圍",
+      "description": "能比較基本保險項目、投保資格、保費與保障內容。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U080",
+      "stage": 2,
+      "context": "稅務與保險",
+      "scenario": "理賠、給付與申訴",
+      "description": "能提出理賠或給付申請，詢問審查進度及異議處理方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U081",
+      "stage": 2,
+      "context": "公共服務",
+      "scenario": "郵件與包裹寄送",
+      "description": "能寄送與領取包裹、填寫地址並處理寄失或延誤。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U082",
+      "stage": 2,
+      "context": "公共服務",
+      "scenario": "圖書館與公共設施",
+      "description": "能申請使用圖書館、運動場館及其他公共服務，理解使用規則。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U083",
+      "stage": 2,
+      "context": "公共服務",
+      "scenario": "垃圾、回收與環境規則",
+      "description": "能理解所在地的回收、清運及環境維護要求並詢問細節。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U084",
+      "stage": 2,
+      "context": "公共服務",
+      "scenario": "社區與市政服務",
+      "description": "能查詢地方公告、反映環境問題並了解常用市政聯絡方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U085",
+      "stage": 2,
+      "context": "人際日常",
+      "scenario": "鄰里寒暄與日常聊天",
+      "description": "能與鄰居進行自然的自我介紹、寒暄與簡短生活交流。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U086",
+      "stage": 2,
+      "context": "人際日常",
+      "scenario": "邀約、聚會與安排",
+      "description": "能提出或回應邀約，協調時間地點與行程變化。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U087",
+      "stage": 2,
+      "context": "人際日常",
+      "scenario": "家庭、生活與個人近況",
+      "description": "能描述自己的家庭、生活習慣、興趣及近期經歷。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U088",
+      "stage": 2,
+      "context": "人際日常",
+      "scenario": "表達需求與互相幫忙",
+      "description": "能向熟人提出適當請求、回應協助並清楚表達個人界線。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U089",
+      "stage": 3,
+      "context": "建立與維持關係",
+      "scenario": "認識新朋友與延伸話題",
+      "description": "能自然開啟對話、尋找共同話題，並使交流持續而不僵硬。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U090",
+      "stage": 3,
+      "context": "建立與維持關係",
+      "scenario": "關係維持與聯絡",
+      "description": "能主動關心近況、回應久未聯絡的朋友並維持關係。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U091",
+      "stage": 3,
+      "context": "建立與維持關係",
+      "scenario": "聚會中的群體互動",
+      "description": "能參與多人對話、適當插話、介紹他人及回應不同觀點。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U092",
+      "stage": 3,
+      "context": "建立與維持關係",
+      "scenario": "深入交流與價值觀",
+      "description": "能討論個人經驗、人生選擇、價值觀與彼此差異。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U093",
+      "stage": 3,
+      "context": "意見與判斷",
+      "scenario": "清楚表達立場",
+      "description": "能就熟悉議題提出立場，說明肯定、不確定與保留之處。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U094",
+      "stage": 3,
+      "context": "意見與判斷",
+      "scenario": "提出理由與比較方案",
+      "description": "能比較不同選項，解釋利弊、證據與選擇理由。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U095",
+      "stage": 3,
+      "context": "意見與判斷",
+      "scenario": "建議、勸說與回應意見",
+      "description": "能提出建議、理解對方顧慮，並以適當語氣勸說或調整提議。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U096",
+      "stage": 3,
+      "context": "意見與判斷",
+      "scenario": "澄清語意與避免誤會",
+      "description": "能在語意不清或被誤解時補充定義、重述觀點並確認共識。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U097",
+      "stage": 3,
+      "context": "情緒與心理支持",
+      "scenario": "描述複雜情緒與壓力",
+      "description": "能辨認並表達挫折、矛盾、焦慮、失望等較細緻的內在感受。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U098",
+      "stage": 3,
+      "context": "情緒與心理支持",
+      "scenario": "傾聽、安慰與關懷",
+      "description": "能理解他人表達的困難，給予自然、尊重的回應與支持。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U099",
+      "stage": 3,
+      "context": "情緒與心理支持",
+      "scenario": "表達個人界線與需求",
+      "description": "能表達自己可接受與不可接受的互動，並提出具體調整需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U100",
+      "stage": 3,
+      "context": "情緒與心理支持",
+      "scenario": "尋求支持與資源",
+      "description": "能說明困境、詢問可用的社會支持或專業資源，理解轉介資訊。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U101",
+      "stage": 3,
+      "context": "協商與衝突處理",
+      "scenario": "有禮而堅定地拒絕",
+      "description": "能在不同人際場合拒絕要求，說明原因並避免不必要的冒犯。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U102",
+      "stage": 3,
+      "context": "協商與衝突處理",
+      "scenario": "表達異議與指出問題",
+      "description": "能就不合理之處提出異議、解釋自身立場並要求澄清。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U103",
+      "stage": 3,
+      "context": "協商與衝突處理",
+      "scenario": "處理誤會與衝突",
+      "description": "能描述衝突經過、回應指責，並討論解決方案與後續安排。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U104",
+      "stage": 3,
+      "context": "協商與衝突處理",
+      "scenario": "協商、妥協與共識",
+      "description": "能談判條件、提出替代方案並確認雙方接受的結果。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U105",
+      "stage": 3,
+      "context": "文化與社會習慣",
+      "scenario": "禮節、稱呼與互動距離",
+      "description": "能理解並使用符合當地習慣的稱呼、禮節與人際互動方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U106",
+      "stage": 3,
+      "context": "文化與社會習慣",
+      "scenario": "節慶、傳統與日常習俗",
+      "description": "能談論當地節慶、生活習俗，並詢問其背景與參與方式。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U107",
+      "stage": 3,
+      "context": "文化與社會習慣",
+      "scenario": "敏感議題與文化差異",
+      "description": "能在接觸不同宗教、社會規範或文化禁忌時審慎提問及回應。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U108",
+      "stage": 3,
+      "context": "文化與社會習慣",
+      "scenario": "跨文化經驗與身份認同",
+      "description": "能比較不同文化的生活經驗，說明自身適應與認同感受。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U109",
+      "stage": 3,
+      "context": "公共生活與社會制度",
+      "scenario": "理解公共機關與制度",
+      "description": "能理解日常涉及的公共機關分工、基本行政流程與公告。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U110",
+      "stage": 3,
+      "context": "公共生活與社會制度",
+      "scenario": "社區參與與志願活動",
+      "description": "能詢問並參與社區活動、志工機會及共同事務討論。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U111",
+      "stage": 3,
+      "context": "公共生活與社會制度",
+      "scenario": "公共規範與集體責任",
+      "description": "能討論公共秩序、社區規則、環境議題及個人責任。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U112",
+      "stage": 3,
+      "context": "公共生活與社會制度",
+      "scenario": "社會福利與公共議題",
+      "description": "能理解常見社會支持制度的討論，並提出一般性意見或疑問。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U113",
+      "stage": 3,
+      "context": "合約與權益",
+      "scenario": "理解常見合約條款",
+      "description": "能閱讀常見服務或租賃條款，詢問限制、期限與權利義務。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U114",
+      "stage": 3,
+      "context": "合約與權益",
+      "scenario": "消費與服務爭議",
+      "description": "能條理清楚地描述爭議經過、提供證據並提出合理訴求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U115",
+      "stage": 3,
+      "context": "合約與權益",
+      "scenario": "提出正式申訴與追蹤",
+      "description": "能撰寫或口頭提出正式申訴，追蹤進度並理解處理回覆。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U116",
+      "stage": 3,
+      "context": "合約與權益",
+      "scenario": "權益疑問與尋找協助",
+      "description": "能詢問一般性權益問題、整理相關文件並尋找可信賴的協助途徑。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U117",
+      "stage": 3,
+      "context": "新聞與公共資訊",
+      "scenario": "理解新聞與事件報導",
+      "description": "能掌握新聞事件的主要事實、背景與各方說法。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U118",
+      "stage": 3,
+      "context": "新聞與公共資訊",
+      "scenario": "辨識來源與核實資訊",
+      "description": "能詢問資訊來源、比較可靠程度並指出未證實之處。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U119",
+      "stage": 3,
+      "context": "新聞與公共資訊",
+      "scenario": "參與公共議題討論",
+      "description": "能對社會議題發問、表達意見並尊重不同立場。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U120",
+      "stage": 3,
+      "context": "新聞與公共資訊",
+      "scenario": "分析觀點、評論與偏誤",
+      "description": "能區分報導與評論，理解修辭、立場及可能的偏誤。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U121",
+      "stage": 3,
+      "context": "進階職場互動",
+      "scenario": "主持與參與會議",
+      "description": "能提出議程、清楚發言、回應提問並確認會議決議。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U122",
+      "stage": 3,
+      "context": "進階職場互動",
+      "scenario": "團隊協作與分歧處理",
+      "description": "能協調分工、討論不同方案，並在分歧中維持有效合作。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U123",
+      "stage": 3,
+      "context": "進階職場互動",
+      "scenario": "提供與接受工作回饋",
+      "description": "能描述工作表現、提出建設性建議並回應批評。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U124",
+      "stage": 3,
+      "context": "進階職場互動",
+      "scenario": "專業社交與跨部門溝通",
+      "description": "能與不熟悉的同事或合作方介紹工作、建立連結並協調需求。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U125",
+      "stage": 3,
+      "context": "敘事、反思與規劃",
+      "scenario": "完整描述個人經歷",
+      "description": "能有條理地敘述事件背景、過程、轉折及結果。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U126",
+      "stage": 3,
+      "context": "敘事、反思與規劃",
+      "scenario": "解釋原因、影響與假設",
+      "description": "能說明問題成因、可能後果及不同條件下的結果。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U127",
+      "stage": 3,
+      "context": "敘事、反思與規劃",
+      "scenario": "反思選擇與表達成長",
+      "description": "能討論過往決策、經驗教訓與個人觀點的改變。",
+      "level": null,
+      "requirements": ""
+    },
+    {
+      "id": "U128",
+      "stage": 3,
+      "context": "敘事、反思與規劃",
+      "scenario": "長期計畫與未來願景",
+      "description": "能提出目標、規劃步驟、分析阻礙並與他人討論未來安排。",
+      "level": null,
+      "requirements": ""
+    }
+  ]
+}
