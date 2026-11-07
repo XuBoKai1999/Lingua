@@ -2,7 +2,7 @@
 
 > Status: **ready to implement**, 2026-11-07. Follow [arch.md](arch.md). This document defines the **entire** first GUI milestone; do not stop after building an empty shell.
 >
-> **Unattended execution:** work through steps 0–7 sequentially in one Codex run, testing and fixing between stages. Do not await further instructions after each step. Use a feature branch and open a PR for review rather than writing unfinished code directly to `main`.
+> **Unattended execution:** work through steps 0–7 sequentially in one Codex run, testing and fixing between stages. Do not await further instructions after each step. **This is a single-developer repository: implement, commit and push directly on `main`; no feature branch or PR is required.** Keep changes small, verified, and reversible through normal Git history.
 
 ## Current source state
 
@@ -14,7 +14,7 @@ Borrow concepts from UEL (`tkinter` home navigation and copy/paste Prompt) and s
 
 - [ ] Read `arch.md`, `steps.md`, current `decisions/003` and `004`, `templates/course.template.json`, `templates/units.template.json`, `templates/units/落地生根.json`, `prompts/course_to_units.md`.
 - [ ] Inspect reference GUI source from UEL (`src/gui.py`, `src/views/new_article.py`) and calibration (`src/calibration/ui/main_window.py`, `case_editor.py`). Only borrow concepts and verified implementation patterns.
-- [ ] Check Git status/branch; avoid overwriting uncommitted user changes. Create work branch `feature/gui-foundation` from current `main` if available. Do not force-push or commit course data.
+- [ ] Check `git status` and current branch; work on `main` after safely fetching/updating from `origin/main`. Do not discard uncommitted user changes or existing branch work; if already on a different branch, transition safely without resetting, overwriting, or losing work. Never force-push or commit user course data.
 - [ ] Confirm existing JSON field definitions and stage count **16/28/44/40**. Do not modify approved templates, previous decisions, or archival files just to suit GUI assumptions.
 
 **Gate:** both references understood and data contract identified.
@@ -79,12 +79,12 @@ Borrow concepts from UEL (`tkinter` home navigation and copy/paste Prompt) and s
 
 **Gate:** all available tests pass or unavoidable environment limitations are documented, with no silent failures.
 
-## Step 7 — Handoff, docs, commits and PR
+## Step 7 — Handoff, docs, commits and direct main push
 
 - [ ] Update `README.md` with exact Windows PowerShell installation/run/test commands, features available **now** and explicit future/nonfunctional UI items.
 - [ ] Update this `steps.md` checkboxes/status to match what was **actually** completed. Do not mark a blocked item complete.
-- [ ] Commit changes on feature branch (small logical commits are fine). Push and, if permitted, create a reviewable PR against `main`. Do **not** auto-merge or rewrite `main`.
-- [ ] Give concise handoff with: branch, commit/PR link, implemented screens, run commands, test results, known limitations, and places where user GUI feedback is needed.
+- [ ] Make small, logical commits **directly on `main`** after relevant verification; push to `origin/main` using a normal, non-force push. Do not create a feature branch or PR for this task, do not reset/rewrite history, and do not overwrite uncommitted changes. If the remote changed, fetch and reconcile safely before pushing; report unresolved conflicts instead of forcing.
+- [ ] Give concise handoff with: latest `main` commit link and push status, implemented screens, run commands, test results, known limitations, and places where user GUI feedback is needed.
 
 ## Minimum acceptance checklist
 
