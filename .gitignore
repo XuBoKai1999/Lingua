@@ -1,0 +1,12 @@
+library/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.qt_for_python/
+screenshots/

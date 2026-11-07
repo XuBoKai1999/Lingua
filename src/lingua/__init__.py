@@ -1,0 +1,1 @@
+"""Lingua desktop application."""
