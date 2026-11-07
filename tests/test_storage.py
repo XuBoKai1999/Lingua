@@ -107,6 +107,22 @@ def test_valid_import_unicode_and_next_id(tmp_path):
     assert storage.next_unit_id(reopened["units"]) == "U010"
 
 
+def test_atomic_replace_failure_preserves_previous_file(tmp_path, monkeypatch):
+    course_dir = storage.create_course(COURSE, template_stages=(0,), library_root=tmp_path)
+    original = (course_dir / "units.json").read_bytes()
+    changed = deepcopy(storage.load_course(course_dir)[1])
+    changed["units"][0]["description"] = "不應覆蓋成功"
+
+    def fail_replace(_source, _target):
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(storage.os, "replace", fail_replace)
+    with pytest.raises(OSError, match="simulated"):
+        storage.save_units(course_dir, changed)
+    assert (course_dir / "units.json").read_bytes() == original
+    assert not list(course_dir.glob(".units.json.*.tmp"))
+
+
 def test_planning_prompt_extracts_only_text_fence_and_expands_placeholders():
     prompt = storage.build_planning_prompt(COURSE, {"units": []}, extra_requirements="偏重旅行")
     assert prompt.startswith("你是 Lingua 的外語課程設計顧問")

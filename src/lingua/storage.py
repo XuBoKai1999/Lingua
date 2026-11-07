@@ -13,7 +13,6 @@ from typing import Any, Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_LIBRARY_ROOT = REPO_ROOT / "library"
-COURSE_TEMPLATE = REPO_ROOT / "templates" / "course.template.json"
 UNITS_TEMPLATE = REPO_ROOT / "templates" / "units" / "落地生根.json"
 PLANNING_PROMPT = REPO_ROOT / "prompts" / "course_to_units.md"
 
