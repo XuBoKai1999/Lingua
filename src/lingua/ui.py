@@ -64,7 +64,7 @@ def _stage_value(text: str) -> int | None:
     return stage
 
 
-def _edit_course_dialog(parent: QWidget, course: dict) -> dict | None:
+def _edit_course_dialog(parent: QWidget, course: dict, course_dir: Path) -> dict | None:
     dialog = QDialog(parent)
     dialog.setWindowTitle("編輯教材")
     layout = QVBoxLayout(dialog)
@@ -101,6 +101,11 @@ def _edit_course_dialog(parent: QWidget, course: dict) -> dict | None:
             validate_course(candidate)
         except ValueError as exception:
             QMessageBox.critical(dialog, "教材資料不正確", str(exception))
+            return
+        try:
+            save_course(course_dir, candidate)
+        except (OSError, ValueError) as exception:
+            QMessageBox.critical(dialog, "無法儲存教材", str(exception))
             return
         result.append(candidate)
         dialog.accept()
@@ -293,6 +298,8 @@ class PromptDialog(QDialog):
             return
         try:
             self.import_text.setPlainText(Path(selected).read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            QMessageBox.critical(self, "無法讀取 JSON", "檔案不是有效的 UTF-8 編碼，請轉存為 UTF-8 後重試。")
         except OSError as exception:
             QMessageBox.critical(self, "無法讀取 JSON", str(exception))
 
@@ -696,13 +703,8 @@ class CourseWorkspace(QWidget):
             return
         if self.current_index is not None:
             self._populate_tree(self.current_index)
-        candidate = _edit_course_dialog(self, deepcopy(self.course))
+        candidate = _edit_course_dialog(self, deepcopy(self.course), self.course_dir)
         if candidate is None:
-            return
-        try:
-            save_course(self.course_dir, candidate)
-        except (OSError, ValueError) as exception:
-            QMessageBox.critical(self, "無法儲存教材", str(exception))
             return
         self.course = candidate
         self._refresh_header()
@@ -891,6 +893,12 @@ class MainWindow(QMainWindow):
 
     def _can_leave(self) -> bool:
         page = self.centralWidget()
+        if self.current_page == "create" and page.property("draft_changed"):
+            return QMessageBox.question(
+                self, "尚未建立教材", "建立教材的草稿尚未儲存，確定放棄並離開？",
+                QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel,
+            ) == QMessageBox.StandardButton.Discard
         return not isinstance(page, CourseWorkspace) or page.maybe_leave()
 
     @staticmethod
@@ -1114,6 +1122,7 @@ class MainWindow(QMainWindow):
             except (OSError, ValueError) as exception:
                 QMessageBox.critical(self, "無法建立教材", str(exception))
                 return
+            scroll.setProperty("draft_changed", False)
             self.navigate("workspace", course_dir)
 
         template_source.toggled.connect(update_preview)
@@ -1127,6 +1136,21 @@ class MainWindow(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setWidget(content)
+
+        def update_draft() -> None:
+            changed = (
+                any(field.text() for field in (name, language, region, default_level))
+                or any(field.toPlainText() for field in (goal, requirements))
+                or not template_source.isChecked()
+                or any(check.isChecked() != (stage in {0, 1}) for stage, check in stage_checks.items())
+            )
+            scroll.setProperty("draft_changed", bool(changed))
+
+        for field in (name, language, region, default_level, goal, requirements):
+            field.textChanged.connect(update_draft)
+        template_source.toggled.connect(update_draft)
+        for checkbox in stage_checks.values():
+            checkbox.toggled.connect(update_draft)
         return scroll
 
     def _build_workspace(self, course_dir: Path | None) -> QWidget:

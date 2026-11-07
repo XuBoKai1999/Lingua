@@ -6,7 +6,9 @@
 
 ## Current source state
 
-Lingua `main` currently contains design history, course/units JSON templates, the complete `落地生根` v0.2 curriculum (`128 Units`) plus Markdown review, and one P2 course-to-units Prompt. **There is no executable GUI yet.**
+Lingua `main` contains the working PySide6 GUI MVP for course creation, browsing and editing, validated P2 Prompt/import workflows, and a demo-only lesson preview, alongside the design history, course/units JSON templates, the complete `落地生根` v0.2 curriculum (`128 Units`) and P2 course-to-units Prompt.
+
+Follow-up verification covers creation-draft leave confirmation, keeping course edits open after failed writes, and rejecting non-UTF-8 imports without replacing existing text or course data.
 
 Borrow concepts from UEL (`tkinter` home navigation and copy/paste Prompt) and structural layout principles from calibration (`PySide6` / layouts / scrollable editor / zoom). Do not copy unrelated application logic.
 

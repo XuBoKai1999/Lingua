@@ -9,6 +9,10 @@ import pytest
 from PySide6.QtCore import QSettings, Qt
 from PySide6.QtWidgets import (
     QApplication,
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -176,11 +180,155 @@ def test_add_move_delete_unit_and_edit_course(app, tmp_path, monkeypatch):
     assert all(unit["id"] != "U045" for unit in workspace.units["units"])
 
     changed_course = {**workspace.course, "goal": "已修改的教材目標", "default_level": None}
-    monkeypatch.setattr(ui, "_edit_course_dialog", lambda *args, **kwargs: changed_course)
+    def edit_course(_parent, _course, course_dir):
+        ui.save_course(course_dir, changed_course)
+        return changed_course
+
+    monkeypatch.setattr(ui, "_edit_course_dialog", edit_course)
     workspace.findChild(QPushButton, "edit_course_button").click()
     saved_course = load_course(window.current_argument)[0]
     assert saved_course["goal"] == "已修改的教材目標"
     assert workspace.effective.text() == "未指定"
+    window.close()
+
+
+@pytest.mark.parametrize("leave", ["go_back", "go_home", "close"])
+def test_create_draft_leave_cancel_and_discard(app, tmp_path, monkeypatch, leave):
+    window = MainWindow(library_root=tmp_path)
+    window.show()
+    window.navigate("create")
+    form = window.centralWidget()
+    form.findChild(QLineEdit, "course_name").setText("未完成草稿")
+    form.findChild(QPlainTextEdit, "course_goal").setPlainText("保留目標")
+    form.findChild(QCheckBox, "stage_2").setChecked(True)
+    history = list(window.history)
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Cancel)
+    getattr(window, leave)()
+    assert window.isVisible()
+    assert window.centralWidget() is form
+    assert window.history == history
+    assert form.findChild(QLineEdit, "course_name").text() == "未完成草稿"
+    assert form.findChild(QPlainTextEdit, "course_goal").toPlainText() == "保留目標"
+    assert form.findChild(QCheckBox, "stage_2").isChecked()
+    assert not list(tmp_path.iterdir())
+
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    getattr(window, leave)()
+    if leave == "close":
+        assert not window.isVisible()
+    else:
+        assert window.current_page == "home"
+        window.close()
+
+
+def test_create_source_draft_and_successful_save(app, tmp_path, monkeypatch):
+    window = MainWindow(library_root=tmp_path)
+    window.navigate("create")
+    questions = []
+    monkeypatch.setattr(
+        QMessageBox, "question",
+        lambda *a: questions.append(a) or QMessageBox.StandardButton.Cancel,
+    )
+    window.findChild(QRadioButton, "blank_source").click()
+    window.go_back()
+    assert len(questions) == 1
+    assert window.current_page == "create"
+    questions.clear()
+    _create_from_current_form(window, blank=True)
+    assert window.current_page == "workspace"
+    assert not questions
+    window.close()
+
+
+def test_create_failed_save_keeps_draft_protection(app, tmp_path, monkeypatch):
+    import lingua.ui as ui
+
+    window = MainWindow(library_root=tmp_path)
+    window.navigate("create")
+    errors = []
+
+    def fail_create(*args, **kwargs):
+        raise OSError("simulated create failure")
+
+    monkeypatch.setattr(ui, "create_course", fail_create)
+    monkeypatch.setattr(QMessageBox, "critical", lambda *a: errors.append(a[2]))
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Cancel)
+    _create_from_current_form(window)
+    assert errors == ["simulated create failure"]
+    window.go_home()
+    assert window.current_page == "create"
+    assert window.findChild(QLineEdit, "course_name").text() == "English - GUI 測試"
+    assert not list(tmp_path.iterdir())
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    window.close()
+
+
+@pytest.mark.parametrize("retry", [True, False])
+def test_course_edit_failed_write_keeps_dialog_for_retry_or_cancel(app, tmp_path, monkeypatch, retry):
+    import lingua.ui as ui
+
+    window = MainWindow(library_root=tmp_path)
+    window.navigate("create")
+    _create_from_current_form(window)
+    workspace = window.centralWidget()
+    original = workspace.course.copy()
+    original_bytes = (workspace.course_dir / "course.json").read_bytes()
+    original_save = ui.save_course
+    errors = []
+
+    def fail_save(*args):
+        raise OSError("simulated write failure")
+
+    monkeypatch.setattr(ui, "save_course", fail_save)
+    monkeypatch.setattr(QMessageBox, "critical", lambda *a: errors.append(a[2]))
+
+    def exercise_dialog(dialog):
+        dialog.show()
+        goal = dialog.findChildren(QPlainTextEdit)[0]
+        goal.setPlainText("修改後的目標")
+        buttons = dialog.findChild(QDialogButtonBox)
+        buttons.button(QDialogButtonBox.StandardButton.Save).click()
+        assert dialog.isVisible()
+        assert goal.toPlainText() == "修改後的目標"
+        assert workspace.course == original
+        assert (workspace.course_dir / "course.json").read_bytes() == original_bytes
+        assert errors == ["simulated write failure"]
+        monkeypatch.setattr(ui, "save_course", original_save)
+        button = QDialogButtonBox.StandardButton.Save if retry else QDialogButtonBox.StandardButton.Cancel
+        buttons.button(button).click()
+        assert not dialog.isVisible()
+        return dialog.result()
+
+    monkeypatch.setattr(QDialog, "exec", exercise_dialog)
+    workspace._edit_course()
+    expected = {**original, "goal": "修改後的目標"} if retry else original
+    assert workspace.course == expected
+    assert load_course(workspace.course_dir)[0] == expected
+    window.close()
+
+
+def test_non_utf8_import_preserves_text_validation_and_course(app, tmp_path, monkeypatch):
+    window = MainWindow(library_root=tmp_path)
+    window.navigate("create")
+    _create_from_current_form(window)
+    workspace = window.centralWidget()
+    original = (workspace.course_dir / "units.json").read_bytes()
+    dialog = PromptDialog(workspace.course_dir, workspace.course, workspace.units, window)
+    dialog.import_text.setPlainText('{"units": []}')
+    dialog._validate_import()
+    candidate = dialog.validated_units
+    invalid = tmp_path / "not-utf8.json"
+    invalid.write_bytes(b'\xff\xfe{"units": []}')
+    errors = []
+    monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *a: (str(invalid), ""))
+    monkeypatch.setattr(QMessageBox, "critical", lambda *a: errors.append(a[2]))
+    dialog._load_import_file()
+    assert len(errors) == 1 and "UTF-8" in errors[0]
+    assert dialog.import_text.toPlainText() == '{"units": []}'
+    assert dialog.validated_units is candidate
+    assert dialog.import_button.isEnabled()
+    assert (workspace.course_dir / "units.json").read_bytes() == original
+    dialog.reject()
     window.close()
 
 
