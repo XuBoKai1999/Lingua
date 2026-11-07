@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QRadioButton,
+    QScrollArea,
+    QTabWidget,
 )
 
 from lingua.storage import load_course
@@ -272,4 +274,33 @@ def test_units_import_requires_validation_and_confirmation(app, tmp_path, monkey
     dialog.findChild(QPushButton, "import_units_button").click()
     assert dialog.imported_units == candidate
     assert load_course(course_dir)[1] == candidate
+    window.close()
+
+
+def test_lesson_preview_is_demo_only_and_scrollable(app, tmp_path):
+    window = MainWindow(library_root=tmp_path)
+    window.findChild(QPushButton, "create_course_button").click()
+    _create_from_current_form(window)
+    course_dir = window.current_argument
+    course_before = (course_dir / "course.json").read_bytes()
+    units_before = (course_dir / "units.json").read_bytes()
+    window.resize(900, 600)
+    window.set_zoom(2.0)
+    window.show()
+    app.processEvents()
+
+    tabs = window.findChild(QTabWidget, "workspace_tabs")
+    assert tabs.count() == 2
+    tabs.setCurrentIndex(1)
+    preview = window.findChild(QScrollArea, "lesson_preview_scroll")
+    assert preview.widgetResizable()
+    assert "僅供 GUI 版面預覽" in preview.findChild(QLabel, "lesson_demo_notice").text()
+    assert "尚未開放" in preview.findChild(QLabel, "lesson_unavailable_notice").text()
+    assert preview.findChild(QPushButton) is None
+    app.processEvents()
+    assert preview.viewport().width() > 0
+    assert preview.viewport().height() > 0
+    assert (course_dir / "course.json").read_bytes() == course_before
+    assert (course_dir / "units.json").read_bytes() == units_before
+    window.set_zoom(1.0)
     window.close()

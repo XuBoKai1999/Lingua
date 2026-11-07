@@ -336,6 +336,13 @@ class PromptDialog(QDialog):
 
 
 class CourseWorkspace(QWidget):
+    DEMO_DIALOGUE = (
+        ("旅人", "Hi! Is this seat taken?"),
+        ("當地人", "No, go ahead. Are you visiting the city?"),
+        ("旅人", "Yes, it’s my first time here. What place would you recommend?"),
+        ("當地人", "The riverside market is nice in the evening."),
+    )
+
     def __init__(self, course_dir: Path, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.course_dir = course_dir
@@ -402,10 +409,11 @@ class CourseWorkspace(QWidget):
         left_layout.addLayout(tree_actions)
         splitter.addWidget(left)
 
-        tabs = QTabWidget()
-        tabs.setObjectName("workspace_tabs")
-        tabs.addTab(self._build_unit_editor(), "Unit 編輯")
-        splitter.addWidget(tabs)
+        self.tabs = QTabWidget()
+        self.tabs.setObjectName("workspace_tabs")
+        self.tabs.addTab(self._build_unit_editor(), "Unit 編輯")
+        self.tabs.addTab(self._build_lesson_preview(), "學習介面示意")
+        splitter.addWidget(self.tabs)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
 
@@ -459,6 +467,62 @@ class CourseWorkspace(QWidget):
         for widget in (self.unit_description, self.unit_requirements):
             widget.textChanged.connect(self._form_changed)
         scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(content)
+        return scroll
+
+    def _build_lesson_preview(self) -> QWidget:
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        notice = QLabel(
+            "僅供 GUI 版面預覽：以下對話與詞彙是程式內建示意，不屬於目前 Unit，"
+            "也不會寫入 course.json 或 units.json。"
+        )
+        notice.setObjectName("lesson_demo_notice")
+        notice.setWordWrap(True)
+        layout.addWidget(notice)
+
+        dialogue = QGroupBox("旅行中初次交談（示意短對話）")
+        dialogue_layout = QVBoxLayout(dialogue)
+        for speaker, line in self.DEMO_DIALOGUE:
+            speaker_label = QLabel(f"{speaker}：")
+            line_label = QLabel(line)
+            speaker_label.setWordWrap(True)
+            line_label.setWordWrap(True)
+            dialogue_layout.addWidget(speaker_label)
+            dialogue_layout.addWidget(line_label)
+        layout.addWidget(dialogue)
+
+        vocabulary = QGroupBox("本課詞彙區（示意）")
+        vocabulary_layout = QVBoxLayout(vocabulary)
+        vocabulary_text = QLabel(
+            "seat taken — 座位有人嗎\n"
+            "first time — 第一次\n"
+            "recommend — 推薦\n\n"
+            "未來會由已確認的 P3 詞彙資料提供；本版不產生或儲存詞彙。"
+        )
+        vocabulary_text.setWordWrap(True)
+        vocabulary_layout.addWidget(vocabulary_text)
+        layout.addWidget(vocabulary)
+
+        practice = QGroupBox("未來 GPT 互動區")
+        practice_layout = QVBoxLayout(practice)
+        practice_text = QLabel(
+            "尚未開放。未來可在此進行情境角色扮演；目前沒有 API 連線，也不會啟動或模擬 GPT。"
+        )
+        practice_text.setWordWrap(True)
+        practice_layout.addWidget(practice_text)
+        layout.addWidget(practice)
+
+        unavailable = QLabel("播放、TTS、錄音與口說辨識尚未開放；本頁沒有可操作的音訊控制項。")
+        unavailable.setObjectName("lesson_unavailable_notice")
+        unavailable.setWordWrap(True)
+        layout.addWidget(unavailable)
+        layout.addStretch()
+
+        scroll = QScrollArea()
+        scroll.setObjectName("lesson_preview_scroll")
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setWidget(content)
