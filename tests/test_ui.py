@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -18,7 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from lingua.storage import load_course
-from lingua.ui import CourseWorkspace, MainWindow
+from lingua.ui import CourseWorkspace, MainWindow, PromptDialog
 
 
 @pytest.fixture(scope="session")
@@ -194,3 +195,81 @@ def test_zoom_is_clamped_and_persisted(app, tmp_path):
     assert reopened.findChild(QLabel, "zoom_label").text() == "150%"
     reopened.set_zoom(1.0)
     reopened.close()
+
+
+def test_prompt_copy_is_fully_expanded(app, tmp_path):
+    window = MainWindow(library_root=tmp_path)
+    window.findChild(QPushButton, "create_course_button").click()
+    _create_from_current_form(window, blank=True)
+    workspace = window.centralWidget()
+    dialog = PromptDialog(window.current_argument, workspace.course, workspace.units, window)
+    dialog.findChild(QPlainTextEdit, "prompt_extra_requirements").setPlainText("偏重旅行社交")
+    dialog.findChild(QPushButton, "copy_prompt_button").click()
+    copied = QApplication.clipboard().text()
+    assert copied.startswith("你是 Lingua 的外語課程設計顧問")
+    assert "偏重旅行社交" in copied
+    assert "{{" not in copied
+    assert "# Course → Units" not in copied
+    assert "【供參考的課綱：若沒有則為 null】\nnull" in copied
+    dialog.reject()
+    window.close()
+
+
+def test_units_import_requires_validation_and_confirmation(app, tmp_path, monkeypatch):
+    window = MainWindow(library_root=tmp_path)
+    window.findChild(QPushButton, "create_course_button").click()
+    _create_from_current_form(window)
+    workspace = window.centralWidget()
+    course_dir = window.current_argument
+    original = (course_dir / "units.json").read_bytes()
+    dialog = PromptDialog(course_dir, workspace.course, workspace.units, window)
+    candidate = {
+        "units": [
+            {
+                "id": "U900",
+                "stage": None,
+                "context": "測試匯入",
+                "scenario": "確認流程",
+                "description": "能驗證匯入",
+                "level": None,
+                "requirements": "",
+            }
+        ]
+    }
+    dialog.findChild(QPlainTextEdit, "units_import_text").setPlainText(
+        json.dumps(candidate, ensure_ascii=False)
+    )
+    dialog.findChild(QPushButton, "validate_import_button").click()
+    assert "1 Units" in dialog.findChild(QLabel, "import_status").text()
+    assert dialog.findChild(QPushButton, "import_units_button").isEnabled()
+
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.No,
+    )
+    dialog.findChild(QPushButton, "import_units_button").click()
+    assert (course_dir / "units.json").read_bytes() == original
+
+    duplicate = {"units": [candidate["units"][0], candidate["units"][0]]}
+    dialog.findChild(QPlainTextEdit, "units_import_text").setPlainText(
+        json.dumps(duplicate, ensure_ascii=False)
+    )
+    dialog.findChild(QPushButton, "validate_import_button").click()
+    assert "ID 重複" in dialog.findChild(QLabel, "import_status").text()
+    assert not dialog.findChild(QPushButton, "import_units_button").isEnabled()
+    assert (course_dir / "units.json").read_bytes() == original
+
+    dialog.findChild(QPlainTextEdit, "units_import_text").setPlainText(
+        json.dumps(candidate, ensure_ascii=False)
+    )
+    dialog.findChild(QPushButton, "validate_import_button").click()
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
+    )
+    dialog.findChild(QPushButton, "import_units_button").click()
+    assert dialog.imported_units == candidate
+    assert load_course(course_dir)[1] == candidate
+    window.close()
