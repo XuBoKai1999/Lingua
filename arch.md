@@ -10,6 +10,8 @@
 
 ## Current extension — make only the Unit being studied
 
+Windows entrypoint: `py run.py` loads this checkout's `src` without installing the project. The stdlib-only launcher reads dependency bounds from `pyproject.toml`, explains missing/incompatible dependencies and the selected interpreter/installation target, and runs pip only after explicit confirmation. Normal Python uses its user site; an active venv uses that venv. A fresh same-interpreter process rechecks dependencies after installation, without an installation retry loop. Editable installation remains available for development. See README for prerequisites and offline/multi-Python behavior.
+
 Select one existing Unit and open `製作／學習目前 Unit`. P3 vocabulary and P4 lesson creation use expanded Prompt copy → external AI → paste/load JSON → validate/read preview → explicit save confirmation. No embedded LLM API or whole-course generation. Both Prompts include all course/Unit specifications and effective level; P4 requires confirmed vocabulary. Temporary requirements only appear in the Prompt.
 
 `materials.py` defines two compact JSON exchanges: vocabulary `{unit_id, cards: [{text, pos, meaning_zh, example, example_zh}]}` and lesson `{unit_id, lines: [{speaker, text, translation_zh}]}`. `text`/`example` use the course target language, Chinese fields use Traditional Chinese. Arrays must be nonempty and every field is validated. Multiple conversations are represented by ordered speaker lines, without a separate dialogue model.

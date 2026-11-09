@@ -2,21 +2,36 @@
 
 Lingua 是以 Python 與 PySide6 製作的本機桌面教材編輯器。可建立、瀏覽與編輯 P1 `course.json` 和 P2 `units.json`，並逐一製作單元詞彙、教材與收聽。AI 內容沿用外部 ChatGPT Prompt／JSON 匯入，不需內建 API 金鑰；Edge TTS 語音生成需要網路。
 
-## Windows 安裝與啟動
+## Windows 啟動
 
-需求：Python 3.11 或更新版本。
-
-在 repository 根目錄開啟 PowerShell：
+先安裝 Python 3.11 或更新版本及 Windows `py` launcher。在 repo 根目錄開啟 PowerShell：
 
 ```powershell
-python --version
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[test]"
-python run.py
+git pull
+py run.py
 ```
 
-請先確認第一行顯示 Python 3.11 或更新版本。使用者教材會存入 repository 內已忽略的 `library/`，不會被 Git 追蹤。
+不必先安裝 Lingua 專案或設定 `PYTHONPATH`。啟動器直接使用此 checkout 的 `src`；已符合依賴版本時直接開啟 GUI。缺少／版本不符時，會列出目前 Python、安裝目標與完整指令，輸入 `y` 才安裝必要依賴，再用同一個 Python 重啟。一般環境安裝至該 Python 的使用者套件目錄；虛擬環境則安裝至該環境。不會靜默安裝、要求管理員或修改安全設定。
+
+首次安裝依賴需要網路，或已備好的 pip 快取／離線套件來源；離線安裝失敗會保留錯誤並停止，不會假裝已啟動。已有相符依賴可離線啟動；TTS 生成仍需網路。若缺少 pip，畫面會提供同一個 Python 的 `ensurepip` 指令供自行執行。
+
+若找不到 `py` 或 Python，請先安裝／修復 Python launcher；程式無法在 Python 執行前自行處理。多版本可用 `py --list`（新版安裝管理器可用 `py list`）查看，再執行例如 `py -3.14 run.py`。安裝與 TTS 子程序均使用實際選中的 Python。
+
+`.venv` 為可選；若想隔離依賴，不需啟用環境或更改 PowerShell 執行原則：
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe run.py
+```
+
+開發／測試仍可照原方式安裝：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[test]"
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+教材存放於 `library/`；請勿將私人教材、產物或音檔加入版本控制。
 
 ## 現有功能
 

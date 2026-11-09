@@ -6,6 +6,8 @@
 
 ## Current source state
 
+Windows launch follow-up: `py run.py` works directly from the checkout; `.venv` and editable installation are optional. Dependency checks and consent-based pip installation/restart live in the existing `run.py`. Verification: 57 tests passed, including a source-copy GUI launch with editable `.pth` activation disabled and no project import available beforehand. Dependency installation/restart branches are simulated; a separate clean Windows PC has not been tested. Existing TTS worker/cache/Qt playback regression tests remain passing.
+
 Single-unit extension: the workspace now offers vocabulary/lesson Prompt exchange, validated confirmed import, per-Unit persistence, vocabulary cards, bilingual reading and content-matched Edge TTS/Qt playback. Only requested current-Unit content is produced.
 
 - [x] Read the existing contracts and Ultimate_English_Learner `src/gui.py`, `src/tts.py`, `src/player.py` (read-only); retain PySide6 and native Qt playback.
