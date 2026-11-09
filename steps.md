@@ -6,6 +6,8 @@
 
 ## Current source state
 
+Unit-production layout follow-up: three explicit stages, shared left-Prompt/right-result splitter, collapsible temporary requirements and on-demand detailed preview. Each stage retains its own draft; confirmed content resumes without regeneration. Audio controls only appear in speech/study. Automated checks exercise 100%/200% fonts at 700×500, 900×600, 1280×720 and 1440×900 after layout settles, including scroll-to-action reachability. Actual Qt screenshots with Microsoft JhengHei are retained outside the repo; native Windows DPI/human acceptance remains separate from offscreen checks.
+
 Windows launch follow-up: `py run.py` works directly from the checkout; `.venv` and editable installation are optional. Dependency checks and consent-based pip installation/restart live in the existing `run.py`. Verification: 57 tests passed, including a source-copy GUI launch with editable `.pth` activation disabled and no project import available beforehand. Dependency installation/restart branches are simulated; a separate clean Windows PC has not been tested. Existing TTS worker/cache/Qt playback regression tests remain passing.
 
 Single-unit extension: the workspace now offers vocabulary/lesson Prompt exchange, validated confirmed import, per-Unit persistence, vocabulary cards, bilingual reading and content-matched Edge TTS/Qt playback. Only requested current-Unit content is produced.

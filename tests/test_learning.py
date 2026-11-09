@@ -13,9 +13,10 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
-from PySide6.QtCore import QSettings, QUrl
+from PySide6.QtCore import QPoint, QRect, QSettings, Qt, QUrl
+from PySide6.QtGui import QFont, QFontMetrics
 from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QMessageBox, QPushButton, QScrollArea
 from PySide6.QtTest import QTest
 
 from lingua import materials, speech, storage
@@ -150,7 +151,7 @@ def test_gui_import_cancel_failure_retry_reopen_and_switch(app, prepared, monkey
     monkeypatch.setattr(materials, "_write_json_atomic", write)
     dialog.save_import()
     assert not dialog.import_dirty and dialog.cards.count() == 1
-    dialog.kind.setCurrentText("lesson")
+    dialog.kind.setCurrentIndex(1)
     dialog.copy_prompt()
     assert "seat taken" in QApplication.clipboard().text()
     dialog.import_text.setPlainText(json.dumps(lesson))
@@ -359,3 +360,192 @@ def test_qprocess_worker_handoff_with_existing_synthetic_cache(app, prepared, mo
     assert Path(dialog.player.source().toLocalFile()) == audio
     assert materials.load_material(directory, course, unit)["vocabulary"] == vocab
     dialog.reject()
+
+
+def test_stage_navigation_keeps_independent_drafts_and_close_cancel(app, prepared, monkeypatch):
+    directory, course, _, unit, vocab, _ = prepared
+    materials.save_content(directory, course, unit, "vocabulary", vocab)
+    original = materials.material_path(directory, unit["id"]).read_bytes()
+    dialog = LearningDialog(directory, course, unit)
+    dialog.show()
+    assert dialog.kind.currentData() == "lesson"
+    lesson_draft = '{"incomplete":'
+    dialog.import_text.setPlainText(lesson_draft)
+    dialog.extra.setPlainText("教材要求")
+    dialog.kind.setCurrentIndex(0)
+    assert json.loads(dialog.import_text.toPlainText()) == vocab
+    dialog.import_text.setPlainText("詞彙草稿")
+    dialog.extra.setPlainText("詞彙要求")
+    dialog.kind.setCurrentIndex(1)
+    assert dialog.import_text.toPlainText() == lesson_draft
+    assert dialog.extra.toPlainText() == "教材要求"
+    assert not dialog.save.isEnabled()
+    dialog.kind.setCurrentIndex(2)
+    assert dialog.audio_panel.isVisible()
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Cancel)
+    dialog.reject()
+    assert dialog.isVisible()
+    dialog.kind.setCurrentIndex(0)
+    assert dialog.import_text.toPlainText() == "詞彙草稿"
+    assert dialog.extra.toPlainText() == "詞彙要求"
+    assert not dialog.audio_panel.isVisible()
+    assert materials.material_path(directory, unit["id"]).read_bytes() == original
+    assert storage.load_course(directory)[0] == course
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    dialog.reject()
+
+
+def test_saved_stages_resume_and_next_requires_successful_save(app, prepared, monkeypatch):
+    directory, course, _, unit, vocab, lesson = prepared
+    dialog = LearningDialog(directory, course, unit)
+    assert dialog.kind.currentIndex() == 0 and not dialog.next.isEnabled()
+    assert not dialog.kind.model().item(1).isEnabled()
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Yes)
+    dialog.import_text.setPlainText(json.dumps(vocab))
+    dialog.validate_import()
+    dialog.save_import()
+    assert dialog.next.isEnabled()
+    dialog.next.click()
+    assert dialog.kind.currentData() == "lesson" and not dialog.next.isEnabled()
+    dialog.import_text.setPlainText(json.dumps(lesson))
+    dialog.validate_import()
+    dialog.save_import()
+    dialog.next.click()
+    assert dialog.kind.currentData() == "study"
+    dialog.reject()
+    reopened = LearningDialog(directory, course, unit)
+    assert reopened.kind.currentData() == "study"
+    reopened.kind.setCurrentIndex(1)
+    assert json.loads(reopened.import_text.toPlainText()) == lesson
+    assert reopened.next.isEnabled()
+    reopened.kind.setCurrentIndex(0)
+    assert json.loads(reopened.import_text.toPlainText()) == vocab
+    reopened.reject()
+
+
+def test_changed_vocabulary_invalidates_validated_lesson_draft_not_its_text(app, prepared, monkeypatch):
+    directory, course, _, unit, vocab, lesson = prepared
+    materials.save_content(directory, course, unit, "vocabulary", vocab)
+    dialog = LearningDialog(directory, course, unit)
+    draft = json.dumps(lesson)
+    dialog.import_text.setPlainText(draft)
+    dialog.validate_import()
+    assert dialog.save.isEnabled()
+    dialog.kind.setCurrentIndex(0)
+    changed = deepcopy(vocab)
+    changed["cards"][0]["text"] = "updated phrase"
+    dialog.import_text.setPlainText(json.dumps(changed))
+    dialog.validate_import()
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Yes)
+    dialog.save_import()
+    dialog.next.click()
+    assert dialog.import_text.toPlainText() == draft
+    assert not dialog.save.isEnabled() and dialog.candidate is None
+    assert "updated phrase" in dialog.prompt.toPlainText()
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    dialog.reject()
+
+
+def test_extra_only_close_protection_and_failed_save_survive_stage_switch(app, prepared, monkeypatch):
+    directory, course, _, unit, vocab, lesson = prepared
+    materials.save_content(directory, course, unit, "vocabulary", vocab)
+    original = materials.material_path(directory, unit["id"]).read_bytes()
+    dialog = LearningDialog(directory, course, unit)
+    dialog.show()
+    dialog.extra.setPlainText("當次補充要求")
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Cancel)
+    dialog.close()
+    assert dialog.isVisible() and dialog.extra.toPlainText() == "當次補充要求"
+    raw = json.dumps(lesson)
+    dialog.import_text.setPlainText(raw)
+    dialog.validate_import()
+    write = materials._write_json_atomic
+    monkeypatch.setattr(materials, "_write_json_atomic", lambda *a: (_ for _ in ()).throw(OSError("full disk")))
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Yes)
+    dialog.save_import()
+    assert "保存失敗" in dialog.status.text()
+    dialog.kind.setCurrentIndex(0)
+    dialog.kind.setCurrentIndex(1)
+    assert dialog.import_text.toPlainText() == raw
+    assert dialog.extra.toPlainText() == "當次補充要求"
+    assert dialog.candidate == lesson and dialog.save.isEnabled()
+    assert materials.material_path(directory, unit["id"]).read_bytes() == original
+    monkeypatch.setattr(materials, "_write_json_atomic", write)
+    dialog.save_import()
+    assert dialog.next.isEnabled() and not dialog.import_dirty and not dialog.extra_dirty
+    dialog.reject()
+
+
+def test_detailed_preview_is_on_demand_and_keeps_candidate(app, prepared, monkeypatch):
+    from PySide6.QtWidgets import QDialog, QPlainTextEdit
+
+    directory, course, _, unit, vocab, _ = prepared
+    dialog = LearningDialog(directory, course, unit)
+    dialog.import_text.setPlainText(json.dumps(vocab))
+    dialog.validate_import()
+    def inspect(preview_dialog):
+        editor = preview_dialog.findChild(QPlainTextEdit)
+        assert editor.isReadOnly()
+        assert json.loads(editor.toPlainText()) == vocab
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(QDialog, "exec", inspect)
+    dialog.details.click()
+    assert dialog.candidate == vocab and dialog.save.isEnabled()
+    assert not materials.material_path(directory, unit["id"]).exists()
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    dialog.reject()
+
+
+@pytest.mark.parametrize("size", [(700, 500), (900, 600), (1280, 720), (1440, 900)])
+@pytest.mark.parametrize("zoom", [1, 2])
+def test_staged_layout_controls_reachable_after_settling(app, prepared, size, zoom):
+    directory, course, _, unit, vocab, _ = prepared
+    materials.save_content(directory, course, unit, "vocabulary", vocab)
+    original_font = QFont(app.font())
+    font = QFont(original_font)
+    font.setPointSizeF((original_font.pointSizeF() if original_font.pointSizeF() > 0 else 10) * zoom)
+    app.setFont(font)
+    dialog = LearningDialog(directory, course, unit)
+    def reachable(button):
+        areas = []
+        parent = button.parentWidget()
+        while parent is not None:
+            if isinstance(parent, QScrollArea):
+                areas.append(parent)
+            parent = parent.parentWidget()
+        for _ in range(2):
+            for area in reversed(areas):
+                area.ensureWidgetVisible(button, 0, 0)
+            app.processEvents()
+        assert button.width() >= button.minimumSizeHint().width()
+        assert button.height() >= button.minimumSizeHint().height()
+        for area in areas:
+            rect = QRect(button.mapTo(area.viewport(), QPoint()), button.size())
+            assert area.viewport().rect().contains(rect), button.text()
+
+    try:
+        dialog.resize(*size)
+        dialog.show()
+        for _ in range(5):
+            QTest.qWait(20)
+        assert dialog.size().width() == size[0] and dialog.size().height() == size[1]
+        for stage in (0, 1):
+            dialog.kind.setCurrentIndex(stage)
+            for _ in range(5):
+                QTest.qWait(20)
+            assert not dialog.audio_panel.isVisible()
+            assert dialog.exchange.orientation() == Qt.Orientation.Horizontal
+            assert dialog.prompt.height() >= QFontMetrics(app.font()).height() * 3
+            assert dialog.import_text.height() >= QFontMetrics(app.font()).height() * 3
+            for button in dialog.exchange.findChildren(QPushButton):
+                reachable(button)
+        dialog.kind.setCurrentIndex(2)
+        for _ in range(5):
+            QTest.qWait(20)
+        assert dialog.audio_panel.isVisible()
+        for button in dialog.study.findChildren(QPushButton):
+            if button.isVisible():
+                reachable(button)
+    finally:
+        dialog.reject()
+        app.setFont(original_font)
