@@ -13,8 +13,8 @@ Single-unit extension: the workspace now offers vocabulary/lesson Prompt exchang
 - [x] Atomic per-Unit records and safe hashed paths; retire changed/deleted identities, preserve other Units and legacy course files.
 - [x] Card word/example playback, lesson controls/progress, actual WordBoundary-based current-line display and explicit no-timestamp limitation.
 - [x] Regression checks for single-unit roundtrip/reopen, invalid input, cancellation, failed writes/retry, curriculum changes, cache identity, and Qt playback controls.
-- [x] Attempt actual online TTS (2026-11-09): service returned WebSocket HTTP 403 after authorized network escalation; confirmed text remains saved and retryable.
-- [ ] Human acceptance: real TTS success, audible output and visual timing on the user's Windows display. Not marked passed by synthetic WAV or mocked tests.
+- [x] Actual online TTS follow-up (2026-11-09): upgraded the running environment from 7.2.8 to 7.3.1 and raised the dependency minimum. Fresh-cache fixed-text synthesis returned real MP3 (21,456 bytes) and 5 valid WordBoundary intervals; Qt decoded 3,576 ms and passed muted playback/control checks. All 44 regression tests passed. The earlier 7.2.8 HTTP 403 remains recorded in the previous work record.
+- [ ] Human acceptance: audible output quality and visual timing on the user's Windows display. Muted Qt playback does not substitute for human listening.
 
 The original steps below record the initial GUI milestone; they do not restrict this newly authorized extension.
 
