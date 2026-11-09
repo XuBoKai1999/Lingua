@@ -28,6 +28,8 @@ Production UI follow-up: the one Unit dialog now guides vocabulary → lesson �
 
 ## 1. Product boundary (initial MVP)
 
+P2 window follow-up: `ui.PromptDialog` now uses a horizontal splitter for the course-planning Prompt and returned curriculum JSON, with independent scrollable panes and explicit Windows MinMax button hints (context-help hint removed). Its previous two-tab layout was distinct from the P3/P4 `LearningDialog` changed earlier. Clipboard/file replacement and closing protect temporary JSON/settings; successful confirmed import still uses the existing validated atomic curriculum save. Native title-bar clicking is not yet verified because application selection approval timed out; Qt state/flag and offscreen layout tests are separate evidence.
+
 Lingua is a local desktop tool for authoring, browsing, and eventually studying vocabulary-driven foreign-language courses. A Course contains Units. Four conceptual stages:
 
 1. P1 — Course specification (human/GUI, `course.json`).

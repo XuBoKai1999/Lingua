@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QScrollArea,
+    QSizePolicy,
     QSplitter,
     QTabWidget,
     QTreeWidget,
@@ -177,32 +178,51 @@ class PromptDialog(QDialog):
         self.validated_units: dict | None = None
         self.imported_units: dict | None = None
         self.setWindowTitle("P2 課綱規劃與匯入")
+        self.setWindowFlag(Qt.WindowType.WindowMinMaxButtonsHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
         available = self.screen().availableGeometry()
         self.resize(min(1100, int(available.width() * 0.85)), min(800, int(available.height() * 0.85)))
         layout = QVBoxLayout(self)
-        tabs = QTabWidget()
-        tabs.addTab(self._build_prompt_tab(), "Prompt 預覽／複製")
-        tabs.addTab(self._build_import_tab(), "匯入 units.json")
-        layout.addWidget(tabs)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.splitter.setObjectName("p2_splitter")
+        for pane in (self._build_prompt_pane(), self._build_import_pane()):
+            for button in pane.findChildren(QPushButton):
+                button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(pane)
+            self.splitter.addWidget(scroll)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setStretchFactor(0, 1)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setSizes([1, 1])
+        layout.addWidget(self.splitter, 1)
         close = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         close.rejected.connect(self.reject)
         layout.addWidget(close)
         self._refresh_prompt()
 
-    def _build_prompt_tab(self) -> QWidget:
+    def _build_prompt_pane(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
+        title = QLabel("左側：課綱 Prompt → 外部 AI")
+        title.setWordWrap(True)
+        layout.addWidget(title)
         explanation = QLabel(
             "這裡只組裝供外部 ChatGPT 對話使用的 Prompt，不會連線或自動產生課綱。"
         )
         explanation.setWordWrap(True)
         layout.addWidget(explanation)
-        self.reference_check = QCheckBox("將完整「落地生根」課綱納入參考")
+        self.reference_check = QCheckBox("參考完整落地生根課綱")
         self.reference_check.setObjectName("prompt_reference")
         layout.addWidget(self.reference_check)
-        layout.addWidget(QLabel("本次額外需求（可留白）"))
+        extra = QPushButton("本次額外需求（選填）")
+        extra.setCheckable(True)
+        layout.addWidget(extra)
         self.extra_requirements = QPlainTextEdit()
         self.extra_requirements.setObjectName("prompt_extra_requirements")
+        self.extra_requirements.hide()
+        extra.toggled.connect(self.extra_requirements.setVisible)
         layout.addWidget(self.extra_requirements)
         layout.addWidget(QLabel("展開後的 Prompt"))
         self.prompt_preview = QPlainTextEdit()
@@ -211,7 +231,7 @@ class PromptDialog(QDialog):
         layout.addWidget(self.prompt_preview, 1)
         actions = QHBoxLayout()
         refresh = QPushButton("更新預覽")
-        copy = QPushButton("複製完整 Prompt")
+        copy = QPushButton("複製 Prompt")
         copy.setObjectName("copy_prompt_button")
         refresh.clicked.connect(self._refresh_prompt)
         copy.clicked.connect(self._copy_prompt)
@@ -219,15 +239,20 @@ class PromptDialog(QDialog):
         actions.addWidget(refresh)
         actions.addWidget(copy)
         layout.addLayout(actions)
+        layout.removeWidget(self.prompt_preview)
+        layout.addWidget(self.prompt_preview, 1)
         self.prompt_status = QLabel()
         self.prompt_status.setObjectName("prompt_status")
         self.prompt_status.setWordWrap(True)
         layout.addWidget(self.prompt_status)
         return page
 
-    def _build_import_tab(self) -> QWidget:
+    def _build_import_pane(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
+        title = QLabel("右側：貼回 AI 結果 → 驗證／匯入")
+        title.setWordWrap(True)
+        layout.addWidget(title)
         explanation = QLabel(
             "貼上或載入外部對話產生的完整 units.json。驗證成功後仍需再次確認，才會取代目前課綱。"
         )
@@ -238,10 +263,10 @@ class PromptDialog(QDialog):
         self.import_text.textChanged.connect(self._import_changed)
         layout.addWidget(self.import_text, 1)
         source_actions = QHBoxLayout()
-        paste = QPushButton("從剪貼簿貼上")
-        load = QPushButton("載入 JSON 檔")
+        paste = QPushButton("貼上結果")
+        load = QPushButton("載入 JSON")
         paste.clicked.connect(
-            lambda: self.import_text.setPlainText(QApplication.clipboard().text())
+            lambda: self._set_import_text(QApplication.clipboard().text())
         )
         load.clicked.connect(self._load_import_file)
         source_actions.addWidget(paste)
@@ -252,19 +277,32 @@ class PromptDialog(QDialog):
         self.import_status.setObjectName("import_status")
         self.import_status.setWordWrap(True)
         layout.addWidget(self.import_status)
-        import_actions = QHBoxLayout()
+        import_actions = QVBoxLayout()
         validate = QPushButton("驗證 JSON")
         validate.setObjectName("validate_import_button")
-        self.import_button = QPushButton("確認取代目前課綱")
+        self.import_button = QPushButton("確認取代課綱")
         self.import_button.setObjectName("import_units_button")
         self.import_button.setEnabled(False)
         validate.clicked.connect(self._validate_import)
         self.import_button.clicked.connect(self._import_validated)
-        import_actions.addStretch()
         import_actions.addWidget(validate)
         import_actions.addWidget(self.import_button)
         layout.addLayout(import_actions)
+        layout.removeWidget(self.import_text)
+        layout.addWidget(self.import_text, 1)
         return page
+
+    def _set_import_text(self, text: str) -> None:
+        current = self.import_text.toPlainText()
+        if current == text:
+            return
+        if current.strip() and QMessageBox.question(
+            self, "取代匯入草稿", "放棄目前貼上的 JSON 草稿？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        ) != QMessageBox.StandardButton.Yes:
+            return
+        self.import_text.setPlainText(text)
 
     def _reference_units(self) -> dict | None:
         return load_template_units(range(4)) if self.reference_check.isChecked() else None
@@ -297,7 +335,7 @@ class PromptDialog(QDialog):
         if not selected:
             return
         try:
-            self.import_text.setPlainText(Path(selected).read_text(encoding="utf-8"))
+            self._set_import_text(Path(selected).read_text(encoding="utf-8"))
         except UnicodeDecodeError:
             QMessageBox.critical(self, "無法讀取 JSON", "檔案不是有效的 UTF-8 編碼，請轉存為 UTF-8 後重試。")
         except OSError as exception:
@@ -340,6 +378,17 @@ class PromptDialog(QDialog):
             return
         self.imported_units = deepcopy(self.validated_units)
         self.accept()
+
+    def reject(self) -> None:
+        if (self.import_text.toPlainText().strip() or self.extra_requirements.toPlainText().strip()
+                or self.reference_check.isChecked()):
+            if QMessageBox.question(
+                self, "未保存規劃草稿", "放棄貼回的 JSON 與本次規劃設定並關閉？",
+                QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel,
+            ) != QMessageBox.StandardButton.Discard:
+                return
+        super().reject()
 
 
 class CourseWorkspace(QWidget):

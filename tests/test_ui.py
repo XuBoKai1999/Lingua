@@ -6,7 +6,9 @@ import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
-from PySide6.QtCore import QSettings, Qt
+from PySide6.QtCore import QPoint, QRect, QSettings, Qt
+from PySide6.QtGui import QFont
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -22,9 +24,10 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QScrollArea,
     QTabWidget,
+    QWidget,
 )
 
-from lingua.storage import load_course
+from lingua.storage import create_course, load_course
 from lingua.ui import CourseWorkspace, MainWindow, PromptDialog
 
 
@@ -328,6 +331,7 @@ def test_non_utf8_import_preserves_text_validation_and_course(app, tmp_path, mon
     assert dialog.validated_units is candidate
     assert dialog.import_button.isEnabled()
     assert (workspace.course_dir / "units.json").read_bytes() == original
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
     dialog.reject()
     window.close()
 
@@ -347,7 +351,7 @@ def test_zoom_is_clamped_and_persisted(app, tmp_path):
     reopened.close()
 
 
-def test_prompt_copy_is_fully_expanded(app, tmp_path):
+def test_prompt_copy_is_fully_expanded(app, tmp_path, monkeypatch):
     window = MainWindow(library_root=tmp_path)
     window.findChild(QPushButton, "create_course_button").click()
     _create_from_current_form(window, blank=True)
@@ -361,6 +365,7 @@ def test_prompt_copy_is_fully_expanded(app, tmp_path):
     assert "{{" not in copied
     assert "# Course → Units" not in copied
     assert "【供參考的課綱：若沒有則為 null】\nnull" in copied
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
     dialog.reject()
     window.close()
 
@@ -452,3 +457,114 @@ def test_lesson_preview_is_demo_only_and_scrollable(app, tmp_path):
     assert (course_dir / "units.json").read_bytes() == units_before
     window.set_zoom(1.0)
     window.close()
+
+
+@pytest.fixture
+def p2_dialog(app, tmp_path):
+    course = {"name": "P2 GUI", "language": "English", "region": None, "goal": "Travel", "default_level": "A2", "requirements": ""}
+    directory = create_course(course, template_stages=(0, 1), library_root=tmp_path)
+    course, units = load_course(directory)
+    parent = QWidget()
+    dialog = PromptDialog(directory, course, units, parent)
+    yield dialog
+    dialog.import_text.clear()
+    dialog.extra_requirements.clear()
+    dialog.reference_check.setChecked(False)
+    dialog.close()
+    parent.close()
+
+
+@pytest.mark.parametrize("draft", ["json", "extra", "reference"])
+def test_p2_window_close_cancel_keeps_draft_and_data(p2_dialog, monkeypatch, draft):
+    dialog = p2_dialog
+    original = (dialog.course_dir / "units.json").read_bytes()
+    dialog.show()
+    if draft == "json":
+        dialog.import_text.setPlainText("incomplete JSON")
+    elif draft == "extra":
+        dialog.extra_requirements.setPlainText("本次要求")
+    else:
+        dialog.reference_check.setChecked(True)
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Cancel)
+    dialog.close()
+    assert dialog.isVisible()
+    assert (dialog.course_dir / "units.json").read_bytes() == original
+    assert dialog.import_text.toPlainText() == ("incomplete JSON" if draft == "json" else "")
+    assert dialog.extra_requirements.toPlainText() == ("本次要求" if draft == "extra" else "")
+    assert dialog.reference_check.isChecked() is (draft == "reference")
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Discard)
+    dialog.close()
+    assert not dialog.isVisible()
+
+
+def test_p2_replacing_draft_can_cancel_and_failed_import_can_retry(p2_dialog, monkeypatch):
+    import lingua.ui as ui
+
+    dialog = p2_dialog
+    original = (dialog.course_dir / "units.json").read_bytes()
+    raw = json.dumps(dialog.units)
+    dialog.import_text.setPlainText(raw)
+    dialog._validate_import()
+    candidate = dialog.validated_units
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.No)
+    dialog._set_import_text('{"units": []}')
+    assert dialog.import_text.toPlainText() == raw and dialog.validated_units is candidate
+    monkeypatch.setattr(QMessageBox, "question", lambda *a: QMessageBox.StandardButton.Yes)
+    dialog._set_import_text('{"units": []}')
+    assert not dialog.import_button.isEnabled() and dialog.validated_units is None
+    dialog._validate_import()
+    saved = ui.save_units
+    errors = []
+    monkeypatch.setattr(ui, "save_units", lambda *a: (_ for _ in ()).throw(OSError("write failed")))
+    monkeypatch.setattr(QMessageBox, "critical", lambda *a: errors.append(a[2]))
+    dialog._import_validated()
+    assert errors == ["write failed"]
+    assert dialog.import_text.toPlainText() == '{"units": []}'
+    assert dialog.validated_units == {"units": []} and dialog.import_button.isEnabled()
+    assert (dialog.course_dir / "units.json").read_bytes() == original
+    monkeypatch.setattr(ui, "save_units", saved)
+    dialog._import_validated()
+    assert dialog.result() == QDialog.DialogCode.Accepted
+    assert load_course(dialog.course_dir)[1] == {"units": []}
+
+
+@pytest.mark.parametrize("size", [(700, 500), (900, 600), (1280, 720)])
+@pytest.mark.parametrize("zoom", [1, 2])
+def test_p2_left_right_and_maximize_restore_keep_draft(app, p2_dialog, size, zoom):
+    dialog = p2_dialog
+    original_font = QFont(app.font())
+    font = QFont(original_font)
+    font.setPointSizeF(max(9, original_font.pointSizeF()) * zoom)
+    app.setFont(font)
+    try:
+        dialog.resize(*size)
+        dialog.show()
+        for _ in range(5):
+            QTest.qWait(20)
+        assert dialog.windowFlags() & Qt.WindowType.WindowMaximizeButtonHint
+        assert dialog.windowFlags() & Qt.WindowType.WindowMinimizeButtonHint
+        assert not (dialog.windowFlags() & Qt.WindowType.WindowContextHelpButtonHint)
+        assert dialog.splitter.orientation() == Qt.Orientation.Horizontal
+        assert dialog.prompt_preview.mapTo(dialog, QPoint()).x() < dialog.import_text.mapTo(dialog, QPoint()).x()
+        dialog.import_text.setPlainText("草稿保留")
+        dialog.showMaximized()
+        QTest.qWait(100)
+        assert dialog.isMaximized()
+        dialog.showNormal()
+        QTest.qWait(100)
+        assert not dialog.isMaximized() and dialog.import_text.toPlainText() == "草稿保留"
+        for button in dialog.splitter.findChildren(QPushButton):
+            areas = []
+            parent = button.parentWidget()
+            while parent is not None:
+                if isinstance(parent, QScrollArea):
+                    areas.append(parent)
+                parent = parent.parentWidget()
+            for _ in range(2):
+                for area in reversed(areas):
+                    area.ensureWidgetVisible(button, 0, 0)
+                app.processEvents()
+            for area in areas:
+                assert area.viewport().rect().contains(QRect(button.mapTo(area.viewport(), QPoint()), button.size())), button.text()
+    finally:
+        app.setFont(original_font)
