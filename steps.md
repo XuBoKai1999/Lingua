@@ -1,10 +1,22 @@
 # Lingua — GUI MVP Implementation Steps
 
-> Status: **GUI MVP implemented and verified**, 2026-11-07. Follow [arch.md](arch.md). This document records the completed first GUI milestone.
+> Status: **GUI MVP implemented; single-unit production/learning extension added**, 2026-11-09. Follow [arch.md](arch.md). The current extension below supersedes the initial milestone's P3/P4/TTS exclusions.
 >
 > **Unattended execution:** work through steps 0–7 sequentially in one Codex run, testing and fixing between stages. Do not await further instructions after each step. **This is a single-developer repository: implement, commit and push directly on `main`; no feature branch or PR is required.** Keep changes small, verified, and reversible through normal Git history.
 
 ## Current source state
+
+Single-unit extension: the workspace now offers vocabulary/lesson Prompt exchange, validated confirmed import, per-Unit persistence, vocabulary cards, bilingual reading and content-matched Edge TTS/Qt playback. Only requested current-Unit content is produced.
+
+- [x] Read the existing contracts and Ultimate_English_Learner `src/gui.py`, `src/tts.py`, `src/player.py` (read-only); retain PySide6 and native Qt playback.
+- [x] Unit-specific P3/P4 Prompts, confirmed vocabulary dependency, source/ID validation, UTF-8 import preview, cancellation and write-failure protection.
+- [x] Atomic per-Unit records and safe hashed paths; retire changed/deleted identities, preserve other Units and legacy course files.
+- [x] Card word/example playback, lesson controls/progress, actual WordBoundary-based current-line display and explicit no-timestamp limitation.
+- [x] Regression checks for single-unit roundtrip/reopen, invalid input, cancellation, failed writes/retry, curriculum changes, cache identity, and Qt playback controls.
+- [x] Attempt actual online TTS (2026-11-09): service returned WebSocket HTTP 403 after authorized network escalation; confirmed text remains saved and retryable.
+- [ ] Human acceptance: real TTS success, audible output and visual timing on the user's Windows display. Not marked passed by synthetic WAV or mocked tests.
+
+The original steps below record the initial GUI milestone; they do not restrict this newly authorized extension.
 
 Lingua `main` contains the working PySide6 GUI MVP for course creation, browsing and editing, validated P2 Prompt/import workflows, and a demo-only lesson preview, alongside the design history, course/units JSON templates, the complete `落地生根` v0.2 curriculum (`128 Units`) and P2 course-to-units Prompt.
 

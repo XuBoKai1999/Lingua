@@ -1,6 +1,6 @@
 # Lingua — GUI MVP Architecture
 
-> Status: **GUI MVP design / Codex implementation contract**, 2026-11-07. This document governs the first inspectable desktop GUI, not the eventual complete learning application.
+> Status: **GUI MVP plus single-unit production/learning**, 2026-11-09. The current extension below supersedes the original MVP exclusions of P3/P4/TTS. The remaining sections describe the initial GUI milestone.
 >
 > Historical design: [decisions/001–004](decisions/) (especially [003](decisions/003_教材與Units_JSON初版設計決議.md), [004](decisions/004_落地生根v0.2與對話式教材構想.md)).
 >
@@ -8,7 +8,21 @@
 >
 > Principle: **如無必要，勿增實體**. Prefer the smallest real working vertical slice over frameworks, premature APIs or inactive buttons.
 
-## 1. Product boundary
+## Current extension — make only the Unit being studied
+
+Select one existing Unit and open `製作／學習目前 Unit`. P3 vocabulary and P4 lesson creation use expanded Prompt copy → external AI → paste/load JSON → validate/read preview → explicit save confirmation. No embedded LLM API or whole-course generation. Both Prompts include all course/Unit specifications and effective level; P4 requires confirmed vocabulary. Temporary requirements only appear in the Prompt.
+
+`materials.py` defines two compact JSON exchanges: vocabulary `{unit_id, cards: [{text, pos, meaning_zh, example, example_zh}]}` and lesson `{unit_id, lines: [{speaker, text, translation_zh}]}`. `text`/`example` use the course target language, Chinese fields use Traditional Chinese. Arrays must be nonempty and every field is validated. Multiple conversations are represented by ordered speaker lines, without a separate dialogue model.
+
+The original six/seven-field `course.json`/`units.json` are unchanged. A course acquires `materials/<sha256(Unit ID)>.json` only when that Unit is produced. This atomic record contains the source course and Unit snapshots, vocabulary and lesson. Changed vocabulary clears the lesson on confirmed save. Source mismatches disable old material until explicit replacement; no data is silently attributed to another Unit. When saving a curriculum, records for removed/changed Units are renamed to recoverable `.retired-<uuid>.json` files before updating `units.json`; failed writes restore the original names. Reordering and unrelated Units leave records untouched. A crash during that sequence may leave a recoverable retired record, never misattach it to a reused ID. No automatic archive restoration or deletion is provided.
+
+`learning.py` uses a single PySide6 dialog with external-AI exchange, left-list/right-card vocabulary, and bilingual lesson lines. `speech.py` runs edge-tts in a cancellable QProcess; only requested word/example/selected-Unit lesson lines are synthesized. Generation sends target-language text to Microsoft's online Edge TTS service. Generated audio works offline. Voice name/rate are editable and kept in QSettings; choose a voice matching the target language (initial default is English). No second GUI or playback dependency is introduced; QMediaPlayer/QAudioOutput supply play, pause, stop, replay, seek and current-clip progress.
+
+Audio is content-addressed by text, voice and rate under the course's `audio/`, with an audio checksum and actual WordBoundary milliseconds in its metadata. Incomplete/corrupt/mismatched cache entries are never played. Each lesson line is a separate clip; current-line highlighting and scrolling use that clip's actual WordBoundary intervals and the player's media position. Progress/seek apply to the current clip; clip changes may have short gaps. Without reliable boundaries, playback remains available but highlighting is explicitly disabled. Switching tabs/cards, settings, saved content or closing the dialog stops playback/generation. Failures keep confirmed text and import drafts for retry.
+
+Validation uses a single 落地生根 Unit (U037) and the existing legacy-course tests. A real Edge TTS call was attempted on 2026-11-09; after sandbox network escalation the service returned WebSocket HTTP 403, so actual service audio and audible synchronization remain unverified. Real Qt decoding/control tests use explicitly synthetic WAV audio, not mocked TTS presented as success.
+
+## 1. Product boundary (initial MVP)
 
 Lingua is a local desktop tool for authoring, browsing, and eventually studying vocabulary-driven foreign-language courses. A Course contains Units. Four conceptual stages:
 

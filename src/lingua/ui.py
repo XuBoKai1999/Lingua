@@ -420,6 +420,11 @@ class CourseWorkspace(QWidget):
         self.tabs.setObjectName("workspace_tabs")
         self.tabs.addTab(self._build_unit_editor(), "Unit 編輯")
         self.tabs.addTab(self._build_lesson_preview(), "學習介面示意")
+        learning = QPushButton("製作／學習目前 Unit（詞彙、教材、語音）")
+        self.learning_button = learning
+        learning.setObjectName("learn_unit_button")
+        learning.clicked.connect(self._open_learning)
+        outer.addWidget(learning)
         splitter.addWidget(self.tabs)
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
@@ -566,6 +571,7 @@ class CourseWorkspace(QWidget):
         else:
             del blocker
             self.current_index = None
+            self.learning_button.setEnabled(False)
             self._loading = True
             self.unit_id.clear()
             self.unit_stage.clear()
@@ -613,6 +619,7 @@ class CourseWorkspace(QWidget):
         unit = self.units["units"][index]
         self._loading = True
         self.current_index = index
+        self.learning_button.setEnabled(True)
         self.unit_id.setText(unit["id"])
         self.unit_stage.setText("" if unit["stage"] is None else str(unit["stage"]))
         self.unit_context.setText(unit["context"])
@@ -709,6 +716,13 @@ class CourseWorkspace(QWidget):
         self.course = candidate
         self._refresh_header()
         self._update_status()
+
+    def _open_learning(self) -> None:
+        if not self._resolve_unsaved() or self.current_index is None:
+            return
+        from lingua.learning import LearningDialog
+        unit = self.units["units"][self.current_index]
+        LearningDialog(self.course_dir, self.course, unit, self).exec()
 
     def _open_planning(self) -> None:
         if not self._resolve_unsaved():

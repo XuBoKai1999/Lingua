@@ -6,6 +6,7 @@ import re
 import shutil
 import tempfile
 import unicodedata
+import uuid
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Iterable
@@ -210,7 +211,25 @@ def save_units(course_dir: Path, units: dict[str, Any]) -> None:
     if not course_dir.is_dir():
         raise FileNotFoundError(f"教材資料夾不存在：{course_dir}")
     validate_units(units)
-    _write_json_atomic(course_dir / "units.json", deepcopy(units))
+    # Retire changed/removed identities before committing the new curriculum.
+    # Keep files recoverable; a failed save restores their original names.
+    from lingua.materials import material_path
+    previous = _read_json(course_dir / "units.json", "units.json")
+    validate_units(previous)
+    current = {unit["id"]: unit for unit in units["units"]}
+    retired = []
+    try:
+        for unit in previous["units"]:
+            path = material_path(course_dir, unit["id"])
+            if current.get(unit["id"]) != unit and path.exists():
+                archive = path.with_suffix(f".retired-{uuid.uuid4().hex}.json")
+                path.rename(archive)
+                retired.append((path, archive))
+        _write_json_atomic(course_dir / "units.json", deepcopy(units))
+    except Exception:
+        for path, archive in reversed(retired):
+            archive.rename(path)
+        raise
 
 
 def import_units(course_dir: Path, text: str) -> dict[str, Any]:
