@@ -232,10 +232,10 @@ class LearningDialog(QDialog):
 
     def refresh_prompt(self):
         try:
-            prompt = build_unit_prompt(self.course, self.unit, self._active_kind, self.record["vocabulary"], self.extra.toPlainText())
-        except ValueError as error:
+            prompt = build_unit_prompt(self.course, self.unit, self._active_kind, self.record["vocabulary"], self.extra.toPlainText(), course_dir=self.course_dir)
+        except (OSError, ValueError, UnicodeError) as error:
             self.prompt.clear()
-            self.status.setText(str(error))
+            self.status.setText("無法產生 Prompt：" + str(error))
             return False
         self.prompt.setPlainText(prompt)
         return True

@@ -68,6 +68,169 @@ def test_single_unit_prompts_roundtrip_and_other_units_unchanged(prepared):
         materials.build_unit_prompt(course, unit, "lesson")
 
 
+@pytest.fixture
+def prompt_course(tmp_path):
+    course = {"name": "Deutsch", "language": "Deutsch", "region": None, "goal": "在不同德語地區旅行與交流", "default_level": "B2", "requirements": "保留自然用語"}
+    directory = storage.create_course(course, library_root=tmp_path)
+    units = {"units": [
+        {"id": unit_id, "stage": stage, "context": f"情境 {i}", "scenario": f"主題 {i}", "description": f"能力 {i}", "level": None, "requirements": f"單元要求 {i}"}
+        for i, (unit_id, stage) in enumerate((("U090", 4), ("U003", 0), ("unit-final", None), ("U001", 1)))
+    ]}
+    storage.save_units(directory, units)
+    return directory, course, units, units["units"][2]
+
+
+def test_p3_order_current_marker_summary_and_json_contract(prompt_course):
+    directory, course, units, unit = prompt_course
+    originals = [(directory / name).read_bytes() for name in ("course.json", "units.json")]
+    for i, item in enumerate(units["units"]):
+        vocabulary = {"unit_id": item["id"], "cards": [{"text": f"Wort {i}", "pos": "名詞", "meaning_zh": f"中文義 {i}", "example": f"Nur Beispiel {i}", "example_zh": f"不該列入摘要的翻譯 {i}"}]}
+        materials.save_content(directory, course, item, "vocabulary", vocabulary)
+    prompt = materials.build_unit_prompt(course, unit, "vocabulary", extra="本次附加要求", course_dir=directory)
+    overview = json.loads(prompt.split("課綱總覽（current_unit 為 true 表示目前單元）：\n")[1].split("\n\n目前單元完整資料與有效程度：")[0])
+    assert [item["id"] for item in overview] == [item["id"] for item in units["units"]]
+    assert [item["current_unit"] for item in overview] == [False, False, True, False]
+    assert all(set(item) == {"id", "stage", "context", "scenario", "description", "current_unit"} for item in overview)
+    current = json.loads(prompt.split("目前單元完整資料與有效程度：\n")[1].split("\n\n先前單元有效詞卡：")[0])
+    assert current == {"unit": unit, "effective_level": "B2"}
+    history = prompt.split("先前單元有效詞卡：\n")[1].split("\n\n當次要求：")[0]
+    summaries = json.loads(history[history.index("["):])
+    assert [item["unit_id"] for item in summaries] == ["U090", "U003"]
+    assert all(set(card) == {"text", "pos", "meaning_zh"} for item in summaries for card in item["cards"])
+    assert "Wort 0" in history and "Wort 1" in history
+    assert all(text not in history for text in ("Wort 2", "Wort 3", "Nur Beispiel", "不該列入摘要的翻譯"))
+    assert "已提供 2/2" in history and "不代表已學會" in history and "不保證完整去重" in history
+    output, _ = json.JSONDecoder().raw_decode(prompt[prompt.index("{"):])
+    materials.validate_content(output, unit["id"], "vocabulary")
+    assert set(output) == {"unit_id", "cards"}
+    assert set(output["cards"][0]) == {"text", "pos", "meaning_zh", "example", "example_zh"}
+    assert '"region": null' in prompt and "本次附加要求" in prompt
+    assert "［" not in prompt and "{{" not in prompt and "落地生根" not in prompt
+    assert originals == [(directory / name).read_bytes() for name in ("course.json", "units.json")]
+
+
+@pytest.mark.parametrize("invalid", ["missing", "json", "utf8", "cards", "course", "unit", "lesson", "wrong_id", "retired"])
+def test_p3_partial_history_excludes_invalid_and_retired(prompt_course, invalid):
+    directory, course, units, unit = prompt_course
+    first, second = units["units"][:2]
+    vocabulary = {"unit_id": first["id"], "cards": [{"text": "gültig", "pos": "形容詞", "meaning_zh": "有效", "example": "Das ist gültig.", "example_zh": "這是有效的。"}]}
+    materials.save_content(directory, course, first, "vocabulary", vocabulary)
+    rejected = {**vocabulary, "unit_id": second["id"], "cards": [{**vocabulary["cards"][0], "text": "DO_NOT_INCLUDE"}]}
+    record = {"source": {"course": deepcopy(course), "unit": deepcopy(second)}, "vocabulary": rejected, "lesson": None}
+    path = materials.material_path(directory, second["id"])
+    if invalid == "cards":
+        record["vocabulary"]["cards"][0]["meaning_zh"] = " "
+    elif invalid == "course":
+        record["source"]["course"]["goal"] = "舊課程"
+    elif invalid == "unit":
+        record["source"]["unit"]["description"] = "舊規範"
+    elif invalid == "lesson":
+        record["lesson"] = {"unit_id": second["id"], "lines": []}
+    elif invalid == "wrong_id":
+        record["vocabulary"]["unit_id"] = first["id"]
+    if invalid != "missing":
+        if invalid == "retired":
+            path = path.with_suffix(".retired-test.json")
+        storage._write_json_atomic(path, record)
+        if invalid in {"json", "utf8"}:
+            path.write_bytes(b"{" if invalid == "json" else b"\xff")
+    prompt = materials.build_unit_prompt(course, unit, "vocabulary", course_dir=directory)
+    history = prompt.split("先前單元有效詞卡：\n")[1].split("\n\n當次要求：")[0]
+    assert "已提供 1/2" in history and "紀錄不完整" in history and "未提供有效詞卡的單元：U003" in history
+    assert "gültig" in history and "DO_NOT_INCLUDE" not in history
+
+
+def test_p3_no_history_and_no_directory_are_explicit(prompt_course):
+    directory, course, units, unit = prompt_course
+    prompt = materials.build_unit_prompt(course, unit, "vocabulary", course_dir=directory)
+    assert "已提供 0/2" in prompt and "紀錄不完整" in prompt
+    assert prompt.endswith("當次要求：\n無")
+    prompt = materials.build_unit_prompt(course, units["units"][0], "vocabulary", course_dir=directory)
+    assert "未提供：目前單元之前沒有單元。" in prompt
+    prompt = materials.build_unit_prompt(course, unit, "vocabulary")
+    assert "未提供：未指定課程資料夾" in prompt
+    assert "未提供：無法確認先前單元的有效詞卡，紀錄不完整。" in prompt
+
+
+@pytest.mark.parametrize(("default", "override", "expected"), [(None, None, None), ("B2", None, "B2"), ("B2", "C1", "C1")])
+def test_p3_live_effective_level_and_region(prompt_course, default, override, expected):
+    directory, course, units, unit = prompt_course
+    storage.save_course(directory, {**course, "default_level": default, "region": "德國、奧地利與瑞士"})
+    units["units"][2] = {**unit, "level": override}
+    storage.save_units(directory, units)
+    prompt = materials.build_unit_prompt(course, unit, "vocabulary", course_dir=directory)
+    assert '"effective_level": ' + json.dumps(expected) in prompt
+    assert "德國、奧地利與瑞士" in prompt
+    assert "未指定時不要自行當成 A1" in prompt
+
+
+def test_p3_open_dialog_rereads_course_order_unit_and_deletion(app, prompt_course):
+    directory, course, units, unit = prompt_course
+    dialog = LearningDialog(directory, course, unit)
+    changed_course = {**course, "goal": "最新課程目標", "default_level": "C2"}
+    storage.save_course(directory, changed_course)
+    ordered = {"units": [units["units"][3], {**unit, "description": "最新能力目標"}, *units["units"][:2]]}
+    storage.save_units(directory, ordered)
+    previous = ordered["units"][0]
+    vocabulary = {"unit_id": previous["id"], "cards": [{"text": "neu", "pos": "形容詞", "meaning_zh": "新的", "example": "Das ist neu.", "example_zh": "這是新的。"}]}
+    materials.save_content(directory, changed_course, previous, "vocabulary", vocabulary)
+    assert dialog.refresh_prompt()
+    dialog.copy_prompt()
+    prompt = QApplication.clipboard().text()
+    assert prompt == dialog.prompt.toPlainText()
+    assert "最新課程目標" in prompt and "最新能力目標" in prompt and '"effective_level": "C2"' in prompt
+    assert prompt.index('"id": "U001"') < prompt.index('"id": "unit-final"') < prompt.index('"id": "U090"')
+    history = prompt.split("先前單元有效詞卡：\n")[1].split("\n\n當次要求：")[0]
+    assert "已提供 1/1" in history and "neu" in history and "U090" not in history
+    assert dialog.course == course and dialog.unit == unit
+    with pytest.raises(ValueError, match="課綱已變更"):
+        materials.save_content(directory, course, unit, "vocabulary", {**vocabulary, "unit_id": unit["id"]})
+    storage.save_units(directory, {"units": [previous]})
+    QApplication.clipboard().setText("keep clipboard")
+    dialog.copy_prompt()
+    assert not dialog.prompt.toPlainText() and "單元已刪除" in dialog.status.text()
+    assert QApplication.clipboard().text() == "keep clipboard"
+    dialog.reject()
+
+
+@pytest.mark.parametrize("failure", ["json", "utf8", "missing_course", "missing_units"])
+def test_p3_live_read_failure_clears_prompt_and_keeps_draft(app, prompt_course, failure):
+    directory, course, _, unit = prompt_course
+    dialog = LearningDialog(directory, course, unit)
+    draft = '{"unfinished": true}'
+    dialog.import_text.setPlainText(draft)
+    if failure.startswith("missing"):
+        (directory / ("course.json" if failure == "missing_course" else "units.json")).unlink()
+    else:
+        (directory / "units.json").write_bytes(b"{" if failure == "json" else b"\xff")
+    assert not dialog.refresh_prompt()
+    assert dialog.prompt.toPlainText() == "" and dialog.status.text()
+    assert dialog.status.text().startswith("無法產生 Prompt：")
+    assert dialog.import_text.toPlainText() == draft and dialog.import_dirty
+    dialog.import_text.clear()
+    dialog.reject()
+
+
+def test_p3_switch_course_uses_its_own_history(app, prompt_course, tmp_path):
+    directory, course, units, unit = prompt_course
+    other_course = {**course, "name": "Français", "language": "Français", "region": "France"}
+    other_dir = storage.create_course(other_course, library_root=tmp_path)
+    storage.save_units(other_dir, units)
+    for root, settings, text in ((directory, course, "FIRST_COURSE_ONLY"), (other_dir, other_course, "SECOND_COURSE_ONLY")):
+        first = units["units"][0]
+        materials.save_content(root, settings, first, "vocabulary", {"unit_id": first["id"], "cards": [{"text": text, "pos": "名詞", "meaning_zh": "測試詞", "example": "Exemple.", "example_zh": "例句。"}]})
+    first_dialog = LearningDialog(directory, course, unit)
+    first_dialog.copy_prompt()
+    assert "FIRST_COURSE_ONLY" in QApplication.clipboard().text()
+    first_dialog.reject()
+    second_dialog = LearningDialog(other_dir, other_course, unit)
+    second_dialog.copy_prompt()
+    prompt = QApplication.clipboard().text()
+    assert "SECOND_COURSE_ONLY" in prompt and "FIRST_COURSE_ONLY" not in prompt
+    assert "Français" in prompt and '"region": "France"' in prompt
+    second_dialog.reject()
+
+
 @pytest.mark.parametrize("mutation", ["wrong_id", "empty", "type", "extra"])
 def test_invalid_content_preserves_old(prepared, mutation):
     directory, course, _, unit, vocab, _ = prepared

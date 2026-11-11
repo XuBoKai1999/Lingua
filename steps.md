@@ -6,6 +6,8 @@
 
 ## Current source state
 
+P3 context follow-up (2026-11-11): implemented the approved vocabulary Prompt with live course/curriculum data, current-Unit marking in array order, and compact summaries from preceding valid confirmed vocabulary. Missing/invalid/stale/retired-only history is explicitly incomplete. Refresh/copy detects deleted Units and read failures without discarding import drafts. Course/Unit/card contracts, P4 and source-snapshot save protection are unchanged. Verification results and limits are recorded in [the work record](chat/20261111-p3-prompt-context.md).
+
 P2-specific correction: the user's reported window was `PromptDialog`, not the earlier `LearningDialog`. P2 now has simultaneous left Prompt/right JSON panes and normal MinMax window hints, plus cancel-safe draft replacement/closing. The full suite passed 80 tests, and 6 additional Microsoft JhengHei font layout cases passed. Native inspection was attempted but app-selection approval timed out; actual Windows title-bar clicks remain a manual acceptance item, not marked passed by offscreen tests.
 
 Unit-production layout follow-up: three explicit stages, shared left-Prompt/right-result splitter, collapsible temporary requirements and on-demand detailed preview. Each stage retains its own draft; confirmed content resumes without regeneration. Audio controls only appear in speech/study. Automated checks exercise 100%/200% fonts at 700×500, 900×600, 1280×720 and 1440×900 after layout settles, including scroll-to-action reachability. Actual Qt screenshots with Microsoft JhengHei are retained outside the repo; native Windows DPI/human acceptance remains separate from offscreen checks.
